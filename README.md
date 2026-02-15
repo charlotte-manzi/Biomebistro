@@ -6,7 +6,7 @@
 
 ## 📋 Contexte du Projet
 
-Projet final pour le cours PHP & MongoDB à l'UCO.
+Projet final pour le cours NoSQL à l'UCO.
 
 **Objectif :** Créer une application complète utilisant MongoDB avec :
 - 5 collections NoSQL (biomes, restaurants, menu_items, reviews, reservations)
