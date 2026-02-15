@@ -12,7 +12,7 @@ Projet final pour le cours NoSQL à l'UCO.
 - 5 collections NoSQL (biomes, restaurants, menu_items, reviews, reservations)
 - CRUD complet (Create, Read, Update, Delete)
 - Tests unitaires
-- Interface bilingue (FR/EN)
+  
 
 **Données :**
 - 8 biomes (Forêt tropicale, Désert, Récif corallien, Montagne alpine, Toundra arctique, Forêt tempérée, Savane africaine, Forêt de champignons)
