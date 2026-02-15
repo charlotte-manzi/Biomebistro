@@ -1,9 +1,9 @@
 /* ============================================
-   BiomeBistro - Images + Animated Overlays
-   Real background images with dynamic effects
+   BiomeBistro - Images + Superpositions Animées
+   Images de fond réelles avec effets dynamiques
    ============================================ */
 
-/* ===== ANIMATED BACKGROUND CONTAINER ===== */
+/* ===== CONTENEUR DE FOND ANIMÉ ===== */
 .animated-background {
     position: fixed;
     top: 0;
@@ -45,7 +45,7 @@
     50% { opacity: 0.8; }
 }
 
-/* ===== FLOATING PARTICLES ===== */
+/* ===== PARTICULES FLOTTANTES ===== */
 .particles {
     position: absolute;
     top: 0;
@@ -61,7 +61,7 @@
     animation-iteration-count: infinite;
 }
 
-/* ===== TROPICAL RAINFOREST ===== */
+/* ===== FORÊT TROPICALE ===== */
 .bg-tropical {
     background-image: url('https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1920&q=80');
 }
@@ -116,7 +116,7 @@
     }
 }
 
-/* ===== DESERT OASIS ===== */
+/* ===== OASIS DÉSERTIQUE ===== */
 .bg-desert {
     background-image: url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1920&q=80');
 }
@@ -195,7 +195,7 @@
     }
 }
 
-/* ===== CORAL REEF ===== */
+/* ===== RÉCIF CORALLIEN ===== */
 .bg-coral {
     background-image: url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920&q=80');
 }
@@ -274,7 +274,7 @@
     }
 }
 
-/* ===== ALPINE MOUNTAIN ===== */
+/* ===== MONTAGNE ALPINE ===== */
 .bg-alpine {
     background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80');
 }
@@ -332,7 +332,7 @@
     }
 }
 
-/* ===== ARCTIC TUNDRA ===== */
+/* ===== TOUNDRA ARCTIQUE ===== */
 .bg-arctic {
     background-image: url('https://images.unsplash.com/photo-1483728642387-6c3bdd6c93e5?w=1920&q=80');
 }
@@ -395,7 +395,7 @@
     }
 }
 
-/* ===== TEMPERATE FOREST ===== */
+/* ===== FORÊT TEMPÉRÉE ===== */
 .bg-forest {
     background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80');
 }
@@ -474,7 +474,7 @@
     }
 }
 
-/* ===== AFRICAN SAVANNA ===== */
+/* ===== SAVANE AFRICAINE ===== */
 .bg-savanna {
     background-image: url('https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1920&q=80');
 }
@@ -507,7 +507,7 @@
     }
 }
 
-/* ===== MYSTICAL MUSHROOM FOREST ===== */
+/* ===== FORÊT MYSTIQUE AUX CHAMPIGNONS ===== */
 .bg-mushroom {
     background-image: url('https://images.unsplash.com/photo-1506318137071-a8e063b4bec0?w=1920&q=80');
 }
@@ -565,7 +565,7 @@
     }
 }
 
-/* ===== HOMEPAGE ===== */
+/* ===== PAGE D'ACCUEIL ===== */
 .bg-homepage {
     background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80');
 }
@@ -609,7 +609,7 @@
     }
 }
 
-/* ===== TEXT SHADOWS for better readability ===== */
+/* ===== OMBRES DE TEXTE pour meilleure lisibilité ===== */
 .detail-header h1,
 .detail-header .detail-meta,
 .detail-header .restaurant-badge,
@@ -642,7 +642,7 @@
     }
 }
 
-/* ===== PAGE TRANSITION ===== */
+/* ===== TRANSITION DE PAGE ===== */
 .page-transition {
     animation: fadeIn 0.8s ease-in-out;
 }
@@ -658,7 +658,7 @@
     }
 }
 
-/* ===== VIGNETTE EFFECT ===== */
+/* ===== EFFET DE VIGNETTE ===== */
 .animated-background::after {
     content: '';
     position: absolute;

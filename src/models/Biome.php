@@ -1,7 +1,7 @@
 <?php
 /**
- * Biome Model
- * Represents ecosystem types (Tropical Rainforest, Desert, etc.)
+ * Modèle Biome
+ * Représente les types d'écosystèmes (Tropical Rainforest, Desert, etc.)
  */
 
 namespace BiomeBistro\Models;
@@ -17,19 +17,19 @@ class Biome {
     }
     
     /**
-     * Get all biomes
+     * Récupère tous les biomes
      * 
-     * @return array Array of biome documents
+     * @return array Tableau de documents biomes
      */
     public function getAll(): array {
         return $this->collection->find()->toArray();
     }
     
     /**
-     * Get biome by ID
+     * Récupère un biome par son ID
      * 
-     * @param string $id Biome ID
-     * @return array|null Biome document or null
+     * @param string $id ID du biome
+     * @return array|null Document biome ou null si non trouvé
      */
     public function getById(string $id): ?array {
         try {
@@ -41,10 +41,10 @@ class Biome {
     }
     
     /**
-     * Get biome by name
+     * Récupère un biome par son nom
      * 
-     * @param string $name Biome name
-     * @return array|null Biome document or null
+     * @param string $name Nom du biome
+     * @return array|null Document biome ou null si non trouvé
      */
     public function getByName(string $name): ?array {
         $result = $this->collection->findOne(['name' => $name]);
@@ -52,27 +52,27 @@ class Biome {
     }
     
     /**
-     * Create a new biome
+     * Crée un nouveau biome
      * 
-     * @param array $data Biome data
-     * @return string|null Inserted ID or null on failure
+     * @param array $data Données du biome
+     * @return string|null ID inséré ou null en cas d'échec
      */
     public function create(array $data): ?string {
         try {
             $result = $this->collection->insertOne($data);
             return (string)$result->getInsertedId();
         } catch (\Exception $e) {
-            error_log("Error creating biome: " . $e->getMessage());
+            error_log("Erreur lors de la création du biome : " . $e->getMessage());
             return null;
         }
     }
     
     /**
-     * Update a biome
+     * Met à jour un biome
      * 
-     * @param string $id Biome ID
-     * @param array $data Updated data
-     * @return bool Success status
+     * @param string $id ID du biome
+     * @param array $data Données mises à jour
+     * @return bool Statut de succès
      */
     public function update(string $id, array $data): bool {
         try {
@@ -82,32 +82,32 @@ class Biome {
             );
             return $result->getModifiedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error updating biome: " . $e->getMessage());
+            error_log("Erreur lors de la mise à jour du biome : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Delete a biome
+     * Supprime un biome
      * 
-     * @param string $id Biome ID
-     * @return bool Success status
+     * @param string $id ID du biome
+     * @return bool Statut de succès
      */
     public function delete(string $id): bool {
         try {
             $result = $this->collection->deleteOne(['_id' => new ObjectId($id)]);
             return $result->getDeletedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error deleting biome: " . $e->getMessage());
+            error_log("Erreur lors de la suppression du biome : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Count restaurants in this biome
+     * Compte le nombre de restaurants dans ce biome
      * 
-     * @param string $biomeId Biome ID
-     * @return int Count of restaurants
+     * @param string $biomeId ID du biome
+     * @return int Nombre de restaurants
      */
     public function countRestaurants(string $biomeId): int {
         $restaurantModel = new Restaurant();
@@ -115,9 +115,9 @@ class Biome {
     }
     
     /**
-     * Get biomes with restaurant count
+     * Récupère tous les biomes avec leur nombre de restaurants
      * 
-     * @return array Array of biomes with restaurant counts
+     * @return array Tableau de biomes avec compteurs de restaurants
      */
     public function getAllWithCounts(): array {
         $biomes = $this->getAll();

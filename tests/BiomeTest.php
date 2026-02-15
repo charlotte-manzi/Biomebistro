@@ -7,7 +7,7 @@ use BiomeBistro\Models\Biome;
 use BiomeBistro\Config\Database;
 
 /**
- * Unit tests for Biome model
+ * Tests unitaires pour le modèle Biome
  */
 class BiomeTest extends TestCase
 {
@@ -21,14 +21,14 @@ class BiomeTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Clean up test data
+        // Nettoyer les données de test
         if ($this->testBiomeId) {
             $this->biomeModel->delete($this->testBiomeId);
         }
     }
 
     /**
-     * Test creating a new biome
+     * Teste la création d'un nouveau biome
      */
     public function testCreateBiome()
     {
@@ -54,11 +54,11 @@ class BiomeTest extends TestCase
     }
 
     /**
-     * Test retrieving a biome by ID
+     * Teste la récupération d'un biome par son ID
      */
     public function testGetBiomeById()
     {
-        // First create a test biome
+        // D'abord créer un biome de test
         $testData = [
             'name' => 'Test Biome Retrieval',
             'description' => 'Testing retrieval',
@@ -76,7 +76,7 @@ class BiomeTest extends TestCase
 
         $this->testBiomeId = $this->biomeModel->create($testData);
         
-        // Retrieve it
+        // Le récupérer
         $biome = $this->biomeModel->getById($this->testBiomeId);
 
         $this->assertNotNull($biome);
@@ -86,7 +86,7 @@ class BiomeTest extends TestCase
     }
 
     /**
-     * Test getting all biomes
+     * Teste la récupération de tous les biomes
      */
     public function testGetAllBiomes()
     {
@@ -95,7 +95,7 @@ class BiomeTest extends TestCase
         $this->assertIsArray($biomes);
         $this->assertGreaterThan(0, count($biomes));
         
-        // Check structure of first biome
+        // Vérifier la structure du premier biome
         if (count($biomes) > 0) {
             $firstBiome = $biomes[0];
             $this->assertArrayHasKey('name', $firstBiome);
@@ -106,11 +106,11 @@ class BiomeTest extends TestCase
     }
 
     /**
-     * Test updating a biome
+     * Teste la mise à jour d'un biome
      */
     public function testUpdateBiome()
     {
-        // Create a test biome
+        // Créer un biome de test
         $testData = [
             'name' => 'Original Name',
             'description' => 'Original description',
@@ -128,7 +128,7 @@ class BiomeTest extends TestCase
 
         $this->testBiomeId = $this->biomeModel->create($testData);
 
-        // Update it
+        // Le mettre à jour
         $updateData = [
             'name' => 'Updated Name',
             'description' => 'Updated description'
@@ -137,18 +137,18 @@ class BiomeTest extends TestCase
         $result = $this->biomeModel->update($this->testBiomeId, $updateData);
         $this->assertTrue($result);
 
-        // Verify update
+        // Vérifier la mise à jour
         $updatedBiome = $this->biomeModel->getById($this->testBiomeId);
         $this->assertEquals('Updated Name', $updatedBiome['name']);
         $this->assertEquals('Updated description', $updatedBiome['description']);
     }
 
     /**
-     * Test deleting a biome
+     * Teste la suppression d'un biome
      */
     public function testDeleteBiome()
     {
-        // Create a test biome
+        // Créer un biome de test
         $testData = [
             'name' => 'To Be Deleted',
             'description' => 'This will be deleted',
@@ -166,19 +166,19 @@ class BiomeTest extends TestCase
 
         $id = $this->biomeModel->create($testData);
         
-        // Delete it
+        // Le supprimer
         $result = $this->biomeModel->delete($id);
         $this->assertTrue($result);
 
-        // Verify deletion
+        // Vérifier la suppression
         $deletedBiome = $this->biomeModel->getById($id);
         $this->assertNull($deletedBiome);
         
-        $this->testBiomeId = null; // Already deleted
+        $this->testBiomeId = null; // Déjà supprimé
     }
 
     /**
-     * Test database connection
+     * Teste la connexion à la base de données
      */
     public function testDatabaseConnection()
     {
@@ -187,25 +187,25 @@ class BiomeTest extends TestCase
     }
 
     /**
-     * Test biome data validation
+     * Teste la validation des données du biome
      */
     public function testBiomeRequiredFields()
-{
-    // Test that valid data has required fields
-    $validData = [
-        'name' => 'Valid Biome',
-        'description' => 'Has required fields',
-        'climate' => ['temperature_range' => '20°C', 'humidity' => '60%', 'rainfall' => 'Low'],
-        'color_theme' => '#27AE60',
-        'icon' => '✅',
-        'native_ingredients' => ['test'],
-        'characteristics' => ['test'],
-        'season_best' => 'All'
-    ];
-    
-    $this->assertArrayHasKey('name', $validData);
-    $this->assertArrayHasKey('description', $validData);
-    $this->assertArrayHasKey('climate', $validData);
-    $this->assertArrayHasKey('color_theme', $validData);
-}
+    {
+        // Tester que les données valides ont les champs requis
+        $validData = [
+            'name' => 'Valid Biome',
+            'description' => 'Has required fields',
+            'climate' => ['temperature_range' => '20°C', 'humidity' => '60%', 'rainfall' => 'Low'],
+            'color_theme' => '#27AE60',
+            'icon' => '✅',
+            'native_ingredients' => ['test'],
+            'characteristics' => ['test'],
+            'season_best' => 'All'
+        ];
+        
+        $this->assertArrayHasKey('name', $validData);
+        $this->assertArrayHasKey('description', $validData);
+        $this->assertArrayHasKey('climate', $validData);
+        $this->assertArrayHasKey('color_theme', $validData);
+    }
 }

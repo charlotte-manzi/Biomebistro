@@ -1,13 +1,13 @@
 /**
- * BiomeBistro - Main JavaScript
- * Handles interactivity, form validation, and dynamic features
+ * BiomeBistro - JavaScript Principal
+ * Gère l'interactivité, la validation des formulaires et les fonctionnalités dynamiques
  */
 
-// Wait for DOM to be fully loaded
+// Attendre que le DOM soit entièrement chargé
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🌍 BiomeBistro initialized!');
+    console.log('🌍 BiomeBistro initialisé !');
     
-    // Initialize all features
+    // Initialiser toutes les fonctionnalités
     initLanguageSwitcher();
     initFormValidation();
     initSmoothScroll();
@@ -15,27 +15,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Language Switcher
- * Handles smooth language transitions
+ * Sélecteur de langue
+ * Gère les transitions de langue fluides
  */
 function initLanguageSwitcher() {
     const langButtons = document.querySelectorAll('.lang-btn');
     
     langButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            // Add loading indicator
+            // Ajouter un indicateur de chargement
             const originalText = this.textContent;
             this.textContent = '...';
             
-            // The actual language switch happens via the PHP redirect
-            // This just provides visual feedback
+            // Le changement de langue s'effectue via la redirection PHP
+            // Ceci fournit uniquement un retour visuel
         });
     });
 }
 
 /**
- * Form Validation
- * Client-side validation for all forms
+ * Validation des formulaires
+ * Validation côté client pour tous les formulaires
  */
 function initFormValidation() {
     const forms = document.querySelectorAll('form');
@@ -44,16 +44,16 @@ function initFormValidation() {
         form.addEventListener('submit', function(e) {
             if (!validateForm(this)) {
                 e.preventDefault();
-                showError('Please fill in all required fields correctly.');
+                showError('Veuillez remplir correctement tous les champs obligatoires.');
             }
         });
     });
 }
 
 /**
- * Validate a form
- * @param {HTMLFormElement} form - The form to validate
- * @returns {boolean} - Whether the form is valid
+ * Valider un formulaire
+ * @param {HTMLFormElement} form - Le formulaire à valider
+ * @returns {boolean} - Indique si le formulaire est valide
  */
 function validateForm(form) {
     const requiredFields = form.querySelectorAll('[required]');
@@ -67,7 +67,7 @@ function validateForm(form) {
             field.classList.remove('error');
         }
         
-        // Email validation
+        // Validation de l'e-mail
         if (field.type === 'email' && field.value) {
             if (!validateEmail(field.value)) {
                 isValid = false;
@@ -75,7 +75,7 @@ function validateForm(form) {
             }
         }
         
-        // Phone validation
+        // Validation du téléphone
         if (field.type === 'tel' && field.value) {
             if (!validatePhone(field.value)) {
                 isValid = false;
@@ -88,8 +88,8 @@ function validateForm(form) {
 }
 
 /**
- * Validate email format
- * @param {string} email - Email to validate
+ * Valider le format d'un e-mail
+ * @param {string} email - E-mail à valider
  * @returns {boolean}
  */
 function validateEmail(email) {
@@ -98,24 +98,24 @@ function validateEmail(email) {
 }
 
 /**
- * Validate phone format (French)
- * @param {string} phone - Phone number to validate
+ * Valider le format d'un numéro de téléphone (français)
+ * @param {string} phone - Numéro à valider
  * @returns {boolean}
  */
 function validatePhone(phone) {
-    // Remove spaces and dashes
+    // Supprimer les espaces et les tirets
     const cleaned = phone.replace(/[\s\-]/g, '');
-    // French phone: +33 or 0 followed by 9 digits
+    // Téléphone français : +33 ou 0 suivi de 9 chiffres
     const re = /^(\+33|0)[1-9]\d{8}$/;
     return re.test(cleaned);
 }
 
 /**
- * Show error message
- * @param {string} message - Error message to display
+ * Afficher un message d'erreur
+ * @param {string} message - Message d'erreur à afficher
  */
 function showError(message) {
-    // Create error element if it doesn't exist
+    // Créer l'élément d'erreur s'il n'existe pas
     let errorDiv = document.getElementById('error-message');
     
     if (!errorDiv) {
@@ -139,15 +139,15 @@ function showError(message) {
     errorDiv.textContent = message;
     errorDiv.style.display = 'block';
     
-    // Hide after 5 seconds
+    // Masquer après 5 secondes
     setTimeout(() => {
         errorDiv.style.display = 'none';
     }, 5000);
 }
 
 /**
- * Show success message
- * @param {string} message - Success message to display
+ * Afficher un message de succès
+ * @param {string} message - Message de succès à afficher
  */
 function showSuccess(message) {
     let successDiv = document.getElementById('success-message');
@@ -179,7 +179,7 @@ function showSuccess(message) {
 }
 
 /**
- * Smooth scroll for anchor links
+ * Défilement fluide pour les liens d'ancrage
  */
 function initSmoothScroll() {
     const anchors = document.querySelectorAll('a[href^="#"]');
@@ -204,13 +204,13 @@ function initSmoothScroll() {
 }
 
 /**
- * Initialize search features
+ * Initialiser les fonctionnalités de recherche
  */
 function initSearchFeatures() {
     const searchInput = document.querySelector('.search-input');
     
     if (searchInput) {
-        // Add search icon behavior
+        // Comportement de l'icône de recherche
         searchInput.addEventListener('focus', function() {
             this.parentElement.classList.add('focused');
         });
@@ -222,8 +222,8 @@ function initSearchFeatures() {
 }
 
 /**
- * Rating stars interaction
- * Used in review forms
+ * Interaction avec les étoiles de notation
+ * Utilisé dans les formulaires d'avis
  */
 function initRatingStars() {
     const ratingContainers = document.querySelectorAll('.rating-input');
@@ -237,7 +237,7 @@ function initRatingStars() {
                 const rating = index + 1;
                 input.value = rating;
                 
-                // Update visual state
+                // Mettre à jour l'état visuel
                 stars.forEach((s, i) => {
                     if (i < rating) {
                         s.classList.add('active');
@@ -277,28 +277,28 @@ function initRatingStars() {
 }
 
 /**
- * Date picker enhancement
- * Prevents booking in the past
+ * Amélioration du sélecteur de date
+ * Empêche la réservation dans le passé
  */
 function initDatePicker() {
     const dateInputs = document.querySelectorAll('input[type="date"]');
     
     dateInputs.forEach(input => {
-        // Set minimum date to today
+        // Définir la date minimale à aujourd'hui
         const today = new Date().toISOString().split('T')[0];
         input.setAttribute('min', today);
     });
 }
 
 /**
- * Time slot availability check (simulation)
- * In production, this would make an AJAX call to check real availability
+ * Vérification de disponibilité des créneaux horaires (simulation)
+ * En production, cela effectuerait un appel AJAX pour vérifier la disponibilité réelle
  */
 function checkAvailability(restaurantId, date, time) {
-    // Simulate availability check
+    // Simuler la vérification de disponibilité
     return new Promise((resolve) => {
         setTimeout(() => {
-            // Random availability for demo
+            // Disponibilité aléatoire pour la démo
             const available = Math.random() > 0.3;
             resolve(available);
         }, 500);
@@ -306,8 +306,8 @@ function checkAvailability(restaurantId, date, time) {
 }
 
 /**
- * Image lazy loading
- * Improves page load performance
+ * Chargement différé des images
+ * Améliore les performances de chargement de la page
  */
 function initLazyLoading() {
     const images = document.querySelectorAll('img[data-src]');
@@ -327,8 +327,8 @@ function initLazyLoading() {
 }
 
 /**
- * Mobile menu toggle
- * For responsive navigation
+ * Menu mobile
+ * Pour la navigation responsive
  */
 function initMobileMenu() {
     const menuToggle = document.querySelector('.menu-toggle');
@@ -343,7 +343,7 @@ function initMobileMenu() {
 }
 
 /**
- * Scroll to top button
+ * Bouton retour en haut de page
  */
 function initScrollToTop() {
     const scrollBtn = document.createElement('button');
@@ -369,7 +369,7 @@ function initScrollToTop() {
     
     document.body.appendChild(scrollBtn);
     
-    // Show/hide based on scroll position
+    // Afficher/masquer selon la position de défilement
     window.addEventListener('scroll', function() {
         if (window.pageYOffset > 300) {
             scrollBtn.style.display = 'block';
@@ -378,7 +378,7 @@ function initScrollToTop() {
         }
     });
     
-    // Scroll to top on click
+    // Remonter en haut au clic
     scrollBtn.addEventListener('click', function() {
         window.scrollTo({
             top: 0,
@@ -387,10 +387,10 @@ function initScrollToTop() {
     });
 }
 
-// Initialize scroll to top button
+// Initialiser le bouton retour en haut
 initScrollToTop();
 
-// Add CSS animation for messages
+// Ajouter l'animation CSS pour les messages
 const style = document.createElement('style');
 style.textContent = `
     @keyframes slideIn {

@@ -1,17 +1,17 @@
 <?php
 /**
- * Language/Translation System for BiomeBistro
- * Supports French (default) and English
+ * Système de langue/traduction pour BiomeBistro
+ * Supporte le français (par défaut) et l'anglais
  */
 
 namespace BiomeBistro\Utils;
 
 class Language {
-    private static string $currentLang = 'fr'; // Default language
+    private static string $currentLang = 'fr'; // Langue par défaut
     private static array $translations = [];
     
     /**
-     * Initialize translations
+     * Initialise les traductions
      */
     public static function init(): void {
         self::$translations = [
@@ -24,7 +24,7 @@ class Language {
                 'about' => 'À propos',
                 'contact' => 'Contact',
                 
-                // Common
+                // Commun
                 'search' => 'Rechercher',
                 'search_placeholder' => 'Rechercher un restaurant, un biome, un plat...',
                 'filter' => 'Filtrer',
@@ -42,7 +42,7 @@ class Language {
                 'delete' => 'Supprimer',
                 'add' => 'Ajouter',
                 
-                // Home page
+                // Page d'accueil
                 'welcome_title' => 'Goûtez les Écosystèmes du Monde',
                 'welcome_subtitle' => 'Découvrez 8 restaurants uniques, chacun inspiré d\'un biome différent',
                 'explore_biomes' => 'Explorer les Biomes',
@@ -85,7 +85,7 @@ class Language {
                 'available' => 'Disponible',
                 'not_available' => 'Non Disponible',
                 
-                // Reviews
+                // Avis
                 'write_review' => 'Écrire un Avis',
                 'your_rating' => 'Votre Note',
                 'your_review' => 'Votre Avis',
@@ -101,7 +101,7 @@ class Language {
                 'verified_visit' => 'Visite Vérifiée',
                 'restaurant_response' => 'Réponse du Restaurant',
                 
-                // Reservations
+                // Réservations
                 'book_table' => 'Réserver une Table',
                 'reservation_date' => 'Date de Réservation',
                 'reservation_time' => 'Heure',
@@ -132,7 +132,7 @@ class Language {
                 'african_savanna' => 'Savane Africaine',
                 'mushroom_forest' => 'Forêt de Champignons',
                 
-                // Filters & Sort
+                // Filtres & Tri
                 'filter_by' => 'Filtrer par',
                 'sort_by' => 'Trier par',
                 'all' => 'Tous',
@@ -143,7 +143,7 @@ class Language {
                 'newest' => 'Plus Récent',
                 'most_popular' => 'Plus Populaire',
                 
-                // Days of week
+                // Jours de la semaine
                 'monday' => 'Lundi',
                 'tuesday' => 'Mardi',
                 'wednesday' => 'Mercredi',
@@ -152,7 +152,7 @@ class Language {
                 'saturday' => 'Samedi',
                 'sunday' => 'Dimanche',
                 
-                // Months
+                // Mois
                 'january' => 'Janvier',
                 'february' => 'Février',
                 'march' => 'Mars',
@@ -166,7 +166,7 @@ class Language {
                 'november' => 'Novembre',
                 'december' => 'Décembre',
                 
-                // Footer
+                // Pied de page
                 'about_us' => 'À Propos de Nous',
                 'terms' => 'Mentions Légales',
                 'privacy' => 'Confidentialité',
@@ -338,7 +338,9 @@ class Language {
     }
     
     /**
-     * Set current language
+     * Définit la langue courante
+     * 
+     * @param string $lang Code de langue ('fr' ou 'en')
      */
     public static function setLanguage(string $lang): void {
         if (in_array($lang, ['fr', 'en'])) {
@@ -348,14 +350,19 @@ class Language {
     }
     
     /**
-     * Get current language
+     * Récupère la langue courante
+     * 
+     * @return string Code de langue courante
      */
     public static function getCurrentLanguage(): string {
         return self::$currentLang;
     }
     
     /**
-     * Get translation for a key
+     * Récupère la traduction pour une clé
+     * 
+     * @param string $key Clé de traduction
+     * @return string Texte traduit ou clé si non trouvé
      */
     public static function get(string $key): string {
         if (empty(self::$translations)) {
@@ -366,7 +373,10 @@ class Language {
     }
     
     /**
-     * Alias for get() - shorter syntax
+     * Alias pour get() - syntaxe plus courte
+     * 
+     * @param string $key Clé de traduction
+     * @return string Texte traduit
      */
     public static function t(string $key): string {
         return self::get($key);

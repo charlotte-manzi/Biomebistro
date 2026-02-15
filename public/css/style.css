@@ -1,11 +1,11 @@
 /* ============================================
-   BiomeBistro - Main Stylesheet
-   A beautiful, responsive design for our biome restaurants
+   BiomeBistro - Feuille de style principale
+   Un design élégant et responsive pour nos restaurants biome
    ============================================ */
 
-/* ===== CSS VARIABLES ===== */
+/* ===== VARIABLES CSS ===== */
 :root {
-    /* Main Colors */
+    /* Couleurs principales */
     --primary-color: #27AE60;
     --primary-dark: #229954;
     --secondary-color: #3498DB;
@@ -16,7 +16,7 @@
     --border-color: #ECF0F1;
     --shadow: rgba(0, 0, 0, 0.1);
     
-    /* Biome Colors */
+    /* Couleurs des biomes */
     --biome-tropical: #2ECC71;
     --biome-desert: #F39C12;
     --biome-coral: #3498DB;
@@ -26,21 +26,21 @@
     --biome-savanna: #F4D03F;
     --biome-mushroom: #9B59B6;
     
-    /* Spacing */
+    /* Espacements */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
     --spacing-md: 1.5rem;
     --spacing-lg: 2rem;
     --spacing-xl: 3rem;
     
-    /* Border Radius */
+    /* Rayons de bordure */
     --radius-sm: 4px;
     --radius-md: 8px;
     --radius-lg: 12px;
     --radius-xl: 16px;
 }
 
-/* ===== RESET & BASE STYLES ===== */
+/* ===== RESET & STYLES DE BASE ===== */
 * {
     margin: 0;
     padding: 0;
@@ -71,22 +71,151 @@ img {
     display: block;
 }
 
-/* ===== CONTAINER ===== */
+/* ===== CONTENEUR ===== */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
 }
 
-/* ===== HEADER ===== */
+/* ===== EN-TÊTE ===== */
+/* Header principal avec texture et dégradé */
 .main-header {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    background: linear-gradient(135deg, #1e7e34 0%, #27ae60 50%, #2ecc71 100%);
     color: white;
-    padding: var(--spacing-md) 0;
-    box-shadow: 0 2px 10px var(--shadow);
+    padding: 0;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
     position: sticky;
     top: 0;
     z-index: 1000;
+    overflow: hidden;
+}
+
+/* Texture overlay */
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(255,255,255,0.03) 10px,
+            rgba(255,255,255,0.03) 20px
+        ),
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 10px,
+            rgba(0,0,0,0.03) 10px,
+            rgba(0,0,0,0.03) 20px
+        );
+    pointer-events: none;
+}
+
+/* Pattern décoratif */
+.main-header::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 300px;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.header-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.logo h1 {
+    color: white;
+    font-size: 1.8rem;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    letter-spacing: 0.5px;
+}
+
+.main-nav {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.main-nav a {
+    color: rgba(255,255,255,0.9);
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    position: relative;
+}
+
+.main-nav a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: white;
+    transition: width 0.3s ease;
+}
+
+.main-nav a:hover {
+    background: rgba(255,255,255,0.15);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.main-nav a:hover::before {
+    width: 80%;
+}
+
+.main-nav a.active {
+    background: rgba(255,255,255,0.25);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.language-switcher {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.1);
+    padding: 0.25rem;
+    border-radius: 25px;
+}
+
+.lang-btn {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    color: white;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.lang-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.05);
+}
+
+.lang-btn.active {
+    background: white;
+    color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .header-content {
@@ -143,7 +272,7 @@ img {
     color: var(--primary-color);
 }
 
-/* ===== HERO SECTION ===== */
+/* ===== SECTION HÉRO ===== */
 .hero {
     background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
     color: white;
@@ -201,7 +330,7 @@ img {
     flex-wrap: wrap;
 }
 
-/* ===== BUTTONS ===== */
+/* ===== BOUTONS ===== */
 .btn {
     display: inline-block;
     padding: var(--spacing-sm) var(--spacing-lg);
@@ -251,7 +380,7 @@ img {
     font-size: 0.9rem;
 }
 
-/* ===== SEARCH SECTION ===== */
+/* ===== SECTION RECHERCHE ===== */
 .search-section {
     padding: var(--spacing-lg) 0;
     background: var(--bg-light);
@@ -312,7 +441,7 @@ img {
     margin-top: var(--spacing-lg);
 }
 
-/* ===== BIOMES GRID ===== */
+/* ===== GRILLE DES BIOMES ===== */
 .biomes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -367,7 +496,7 @@ img {
     line-height: 1.5;
 }
 
-/* ===== RESTAURANT GRID & CARDS ===== */
+/* ===== GRILLE & CARTES RESTAURANTS ===== */
 .restaurant-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -472,7 +601,7 @@ img {
     flex: 1;
 }
 
-/* ===== REVIEWS GRID & CARDS ===== */
+/* ===== GRILLE & CARTES AVIS ===== */
 .reviews-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -549,7 +678,7 @@ img {
     font-size: 0.9rem;
 }
 
-/* ===== FOOTER ===== */
+/* ===== PIED DE PAGE ===== */
 .main-footer {
     background: var(--text-color);
     color: white;
@@ -616,9 +745,9 @@ img {
     color: rgba(255, 255, 255, 0.7);
 }
 
-/* ===== RESPONSIVE DESIGN ===== */
+/* ===== RESPONSIVE ===== */
 
-/* Tablet */
+/* Tablette */
 @media (max-width: 768px) {
     .hero-title {
         font-size: 2rem;
@@ -701,7 +830,7 @@ img {
     }
 }
 
-/* ===== UTILITY CLASSES ===== */
+/* ===== CLASSES UTILITAIRES ===== */
 .text-center {
     text-align: center;
 }

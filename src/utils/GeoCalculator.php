@@ -1,23 +1,23 @@
 <?php
 /**
- * GeoCalculator - GPS and distance calculation utilities
- * Calculates distances between coordinates and handles geospatial queries
+ * GeoCalculator - Utilitaires de calcul GPS et de distance
+ * Calcule les distances entre coordonnées et gère les requêtes géospatiales
  */
 
 namespace BiomeBistro\Utils;
 
 class GeoCalculator {
-    // Earth's radius in kilometers
+    // Rayon de la Terre en kilomètres
     private const EARTH_RADIUS_KM = 6371;
     
     /**
-     * Calculate distance between two GPS coordinates using Haversine formula
+     * Calcule la distance entre deux coordonnées GPS en utilisant la formule de Haversine
      * 
-     * @param float $lat1 Latitude of first point
-     * @param float $lon1 Longitude of first point
-     * @param float $lat2 Latitude of second point
-     * @param float $lon2 Longitude of second point
-     * @return float Distance in kilometers
+     * @param float $lat1 Latitude du premier point
+     * @param float $lon1 Longitude du premier point
+     * @param float $lat2 Latitude du second point
+     * @param float $lon2 Longitude du second point
+     * @return float Distance en kilomètres
      */
     public static function calculateDistance(
         float $lat1, 
@@ -25,35 +25,35 @@ class GeoCalculator {
         float $lat2, 
         float $lon2
     ): float {
-        // Convert degrees to radians
+        // Convertir les degrés en radians
         $lat1Rad = deg2rad($lat1);
         $lon1Rad = deg2rad($lon1);
         $lat2Rad = deg2rad($lat2);
         $lon2Rad = deg2rad($lon2);
         
-        // Calculate differences
+        // Calculer les différences
         $latDiff = $lat2Rad - $lat1Rad;
         $lonDiff = $lon2Rad - $lon1Rad;
         
-        // Haversine formula
+        // Formule de Haversine
         $a = sin($latDiff / 2) * sin($latDiff / 2) +
              cos($lat1Rad) * cos($lat2Rad) *
              sin($lonDiff / 2) * sin($lonDiff / 2);
         
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         
-        // Distance in kilometers
+        // Distance en kilomètres
         $distance = self::EARTH_RADIUS_KM * $c;
         
         return round($distance, 2);
     }
     
     /**
-     * Format distance for display
+     * Formate la distance pour l'affichage
      * 
-     * @param float $distanceKm Distance in kilometers
-     * @param string $lang Language ('fr' or 'en')
-     * @return string Formatted distance string
+     * @param float $distanceKm Distance en kilomètres
+     * @param string $lang Langue ('fr' ou 'en')
+     * @return string Chaîne de distance formatée
      */
     public static function formatDistance(float $distanceKm, string $lang = 'fr'): string {
         if ($distanceKm < 1) {
@@ -65,20 +65,20 @@ class GeoCalculator {
     }
     
     /**
-     * Find restaurants within a certain radius from a point
-     * Returns MongoDB geospatial query
+     * Trouve les restaurants dans un certain rayon à partir d'un point
+     * Retourne une requête géospatiale MongoDB
      * 
-     * @param float $latitude Center latitude
-     * @param float $longitude Center longitude
-     * @param float $radiusKm Radius in kilometers
-     * @return array MongoDB query array
+     * @param float $latitude Latitude du centre
+     * @param float $longitude Longitude du centre
+     * @param float $radiusKm Rayon en kilomètres
+     * @return array Tableau de requête MongoDB
      */
     public static function getNearbyQuery(
         float $latitude, 
         float $longitude, 
         float $radiusKm
     ): array {
-        // Convert km to meters for MongoDB
+        // Convertir km en mètres pour MongoDB
         $radiusMeters = $radiusKm * 1000;
         
         return [
@@ -86,7 +86,7 @@ class GeoCalculator {
                 '$near' => [
                     '$geometry' => [
                         'type' => 'Point',
-                        'coordinates' => [$longitude, $latitude] // MongoDB uses [lon, lat]
+                        'coordinates' => [$longitude, $latitude] // MongoDB utilise [lon, lat]
                     ],
                     '$maxDistance' => $radiusMeters
                 ]
@@ -95,7 +95,7 @@ class GeoCalculator {
     }
     
     /**
-     * Get Paris center coordinates (for default location)
+     * Récupère les coordonnées du centre de Paris (pour la localisation par défaut)
      * 
      * @return array ['lat' => float, 'lon' => float]
      */
@@ -107,11 +107,11 @@ class GeoCalculator {
     }
     
     /**
-     * Validate GPS coordinates
+     * Valide les coordonnées GPS
      * 
-     * @param float $latitude
-     * @param float $longitude
-     * @return bool
+     * @param float $latitude Latitude
+     * @param float $longitude Longitude
+     * @return bool True si valides
      */
     public static function validateCoordinates(float $latitude, float $longitude): bool {
         return ($latitude >= -90 && $latitude <= 90) && 
@@ -119,23 +119,23 @@ class GeoCalculator {
     }
     
     /**
-     * Get arrondissement from coordinates (simplified for Paris)
-     * This is a simplified version - in production, you'd use a proper geocoding service
+     * Récupère l'arrondissement à partir des coordonnées (simplifié pour Paris)
+     * Ceci est une version simplifiée - en production, utiliser un service de géocodage approprié
      * 
-     * @param float $latitude
-     * @param float $longitude
-     * @return string Arrondissement (e.g., "18ème")
+     * @param float $latitude Latitude
+     * @param float $longitude Longitude
+     * @return string Arrondissement (par ex., "18ème")
      */
     public static function getArrondissement(float $latitude, float $longitude): string {
-        // This is a simplified mapping - in real application, use proper geocoding
-        // Based on rough Paris arrondissement coordinates
+        // Ceci est une correspondance simplifiée - dans une application réelle, utiliser un géocodage approprié
+        // Basé sur des coordonnées approximatives des arrondissements de Paris
         $arrondissements = [
-            ['lat' => 48.8566, 'lon' => 2.3522, 'arr' => '1er'],   // Center
-            ['lat' => 48.8647, 'lon' => 2.3370, 'arr' => '9ème'],  // Opera
+            ['lat' => 48.8566, 'lon' => 2.3522, 'arr' => '1er'],   // Centre
+            ['lat' => 48.8647, 'lon' => 2.3370, 'arr' => '9ème'],  // Opéra
             ['lat' => 48.8738, 'lon' => 2.3505, 'arr' => '18ème'], // Montmartre
             ['lat' => 48.8566, 'lon' => 2.3522, 'arr' => '4ème'],  // Marais
             ['lat' => 48.8448, 'lon' => 2.3736, 'arr' => '12ème'], // Bercy
-            ['lat' => 48.8534, 'lon' => 2.3488, 'arr' => '5ème'],  // Latin Quarter
+            ['lat' => 48.8534, 'lon' => 2.3488, 'arr' => '5ème'],  // Quartier Latin
             ['lat' => 48.8422, 'lon' => 2.3219, 'arr' => '14ème'], // Montparnasse
             ['lat' => 48.8738, 'lon' => 2.2950, 'arr' => '17ème'], // Batignolles
         ];

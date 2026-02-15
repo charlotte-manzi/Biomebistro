@@ -1,11 +1,18 @@
 <?php
+/**
+ * Validator - Classe de validation des données
+ * Fournit des méthodes de validation pour différents types de données utilisateur
+ */
 
 namespace BiomeBistro\Utils;
 
 class Validator
 {
     /**
-     * Validate email format
+     * Valide le format d'un email
+     * 
+     * @param string $email Adresse email à valider
+     * @return bool True si l'email est valide
      */
     public static function validateEmail(string $email): bool
     {
@@ -13,19 +20,25 @@ class Validator
     }
     
     /**
-     * Validate phone number (French format)
+     * Valide le numéro de téléphone (format français)
+     * 
+     * @param string $phone Numéro de téléphone à valider
+     * @return bool True si le numéro est valide
      */
     public static function validatePhone(string $phone): bool
     {
-        // Remove spaces and dashes
+        // Supprimer les espaces et les tirets
         $cleaned = preg_replace('/[\s\-]/', '', $phone);
         
-        // French phone: +33 or 0 followed by 9 digits
+        // Téléphone français : +33 ou 0 suivi de 9 chiffres
         return preg_match('/^(\+33|0)[1-9]\d{8}$/', $cleaned) === 1;
     }
     
     /**
-     * Validate rating (1-5)
+     * Valide une note (1-5)
+     * 
+     * @param int $rating Note à valider
+     * @return bool True si la note est entre 1 et 5
      */
     public static function validateRating(int $rating): bool
     {
@@ -33,7 +46,10 @@ class Validator
     }
     
     /**
-     * Validate date format (Y-m-d)
+     * Valide le format de date (Y-m-d)
+     * 
+     * @param string $date Date à valider (format YYYY-MM-DD)
+     * @return bool True si la date est valide
      */
     public static function validateDate(string $date): bool
     {
@@ -42,7 +58,10 @@ class Validator
     }
     
     /**
-     * Validate time format (H:i)
+     * Valide le format d'heure (H:i)
+     * 
+     * @param string $time Heure à valider (format HH:MM)
+     * @return bool True si l'heure est valide
      */
     public static function validateTime(string $time): bool
     {
@@ -50,7 +69,10 @@ class Validator
     }
     
     /**
-     * Validate price
+     * Valide un prix
+     * 
+     * @param float $price Prix à valider
+     * @return bool True si le prix est positif et raisonnable
      */
     public static function validatePrice(float $price): bool
     {
@@ -58,7 +80,10 @@ class Validator
     }
     
     /**
-     * Validate party size
+     * Valide la taille d'un groupe
+     * 
+     * @param int $size Nombre de personnes
+     * @return bool True si la taille est entre 1 et 20
      */
     public static function validatePartySize(int $size): bool
     {
@@ -66,7 +91,10 @@ class Validator
     }
     
     /**
-     * Validate MongoDB ObjectId
+     * Valide un ObjectId MongoDB
+     * 
+     * @param string $id ID à valider
+     * @return bool True si l'ID est un ObjectId MongoDB valide
      */
     public static function validateObjectId(string $id): bool
     {
@@ -74,7 +102,10 @@ class Validator
     }
     
     /**
-     * Sanitize string input
+     * Nettoie et sécurise une chaîne de caractères
+     * 
+     * @param string $input Chaîne à nettoyer
+     * @return string Chaîne nettoyée et sécurisée
      */
     public static function sanitizeString(string $input): string
     {
@@ -82,85 +113,91 @@ class Validator
     }
     
     /**
-     * Validate reservation data
+     * Valide les données d'une réservation
+     * 
+     * @param array $data Données de réservation à valider
+     * @return array Tableau d'erreurs (vide si pas d'erreur)
      */
     public static function validateReservation(array $data): array
     {
         $errors = [];
         
-        // Validate customer name
+        // Valider le nom du client
         if (empty($data['customer_info']['name'])) {
-            $errors[] = "Name is required";
+            $errors[] = "Le nom est requis";
         }
         
-        // Validate email
+        // Valider l'email
         if (empty($data['customer_info']['email'])) {
-            $errors[] = "Email is required";
+            $errors[] = "L'email est requis";
         } elseif (!self::validateEmail($data['customer_info']['email'])) {
-            $errors[] = "Invalid email format";
+            $errors[] = "Format d'email invalide";
         }
         
-        // Validate phone
+        // Valider le téléphone
         if (empty($data['customer_info']['phone'])) {
-            $errors[] = "Phone is required";
+            $errors[] = "Le téléphone est requis";
         } elseif (!self::validatePhone($data['customer_info']['phone'])) {
-            $errors[] = "Invalid phone format (use +33 1 XX XX XX XX)";
+            $errors[] = "Format de téléphone invalide (utiliser +33 1 XX XX XX XX)";
         }
         
-        // Validate date
+        // Valider la date
         if (empty($data['reservation_date'])) {
-            $errors[] = "Reservation date is required";
+            $errors[] = "La date de réservation est requise";
         } elseif (!self::validateDate($data['reservation_date'])) {
-            $errors[] = "Invalid date format";
+            $errors[] = "Format de date invalide";
         }
         
-        // Validate time
+        // Valider l'heure
         if (empty($data['reservation_time'])) {
-            $errors[] = "Reservation time is required";
+            $errors[] = "L'heure de réservation est requise";
         }
         
-        // Validate party size
+        // Valider la taille du groupe
         if (empty($data['party_size']) || $data['party_size'] < 1 || $data['party_size'] > 20) {
-            $errors[] = "Party size must be between 1 and 20";
+            $errors[] = "La taille du groupe doit être entre 1 et 20";
         }
         
         return $errors;
     }
     
     /**
-     * Validate review data
+     * Valide les données d'un avis
+     * 
+     * @param array $data Données d'avis à valider
+     * @return array Tableau d'erreurs (vide si pas d'erreur)
      */
     public static function validateReview(array $data): array
     {
         $errors = [];
         
-        // Validate reviewer name
+        // Valider le nom du reviewer
         if (empty($data['reviewer_name'])) {
-            $errors[] = "Name is required";
+            $errors[] = "Le nom est requis";
         }
         
-        // Validate email
+        // Valider l'email
         if (empty($data['reviewer_email'])) {
-            $errors[] = "Email is required";
+            $errors[] = "L'email est requis";
         } elseif (!self::validateEmail($data['reviewer_email'])) {
-            $errors[] = "Invalid email format";
+            $errors[] = "Format d'email invalide";
         }
         
-        // Validate rating
+        // Valider la note
         if (empty($data['rating']) || !self::validateRating($data['rating'])) {
-            $errors[] = "Please select a rating (1-5 stars)";
+            $errors[] = "Veuillez sélectionner une note (1-5 étoiles)";
         }
         
-        // Validate title
+        // Valider le titre
         if (empty($data['title'])) {
-            $errors[] = "Review title is required";
+            $errors[] = "Le titre de l'avis est requis";
         }
         
-        // Validate comment
+        // Valider le commentaire
         if (empty($data['comment'])) {
-            $errors[] = "Review comment is required";
+            $errors[] = "Le commentaire de l'avis est requis";
         } elseif (strlen($data['comment']) < 10) {
-            $errors[] = "Review comment must be at least 10 characters";
+            $errors[] = "Le commentaire doit contenir au moins 10 caractères";
         }
         
         return $errors;

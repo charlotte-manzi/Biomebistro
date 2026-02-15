@@ -1,6 +1,6 @@
 <?php
 /**
- * BiomeBistro - Make Reservation Page
+ * BiomeBistro - Page de Réservation
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -32,22 +32,22 @@ if (!$restaurant) {
     exit;
 }
 
-// Handle form submission
+// Traitement de la soumission du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reservationModel = new Reservation();
     
     $data = [
         'restaurant_id' => $restaurantId,
         'customer_info' => [
-            'name' => $_POST['name'] ?? '',
+            'name'  => $_POST['name']  ?? '',
             'email' => $_POST['email'] ?? '',
             'phone' => $_POST['phone'] ?? ''
         ],
-        'reservation_date' => $_POST['date'] ?? '',
-        'reservation_time' => $_POST['time'] ?? '',
-        'party_size' => intval($_POST['party_size'] ?? 0),
+        'reservation_date' => $_POST['date']    ?? '',
+        'reservation_time' => $_POST['time']    ?? '',
+        'party_size'       => intval($_POST['party_size'] ?? 0),
         'special_requests' => $_POST['special_requests'] ?? '',
-        'status' => 'pending'
+        'status'           => 'pending'
     ];
     
     $errors = Validator::validateReservation($data);
@@ -139,6 +139,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <a href="index.php"><?php echo Language::t('home'); ?></a>
                     <a href="biomes.php"><?php echo Language::t('biomes'); ?></a>
                     <a href="restaurants.php"><?php echo Language::t('restaurants'); ?></a>
+                    <a href="my-reservations.php?email=demo@example.com">
+                        <?php echo $lang === 'fr' ? 'Mes Réservations' : 'My Reservations'; ?>
+                    </a>
                 </nav>
                 <div class="language-switcher">
                     <a href="?restaurant=<?php echo $restaurantId; ?>&lang=fr" class="lang-btn <?php echo $lang === 'fr' ? 'active' : ''; ?>">🇫🇷 FR</a>
@@ -160,7 +163,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <?php echo $confirmationCode ?? 'N/A'; ?>
                         </div>
                         <p style="margin-top: 1rem;">
-                            <?php echo $lang === 'fr' ? 'Nous avons envoyé une confirmation à' : 'We sent a confirmation to'; ?>:
+                            <?php echo $lang === 'fr' ? 'Nous avons envoyé une confirmation à' : 'We sent a confirmation to'; ?> :
                             <strong><?php echo htmlspecialchars($_POST['email']); ?></strong>
                         </p>
                         <div style="margin-top: 2rem;">

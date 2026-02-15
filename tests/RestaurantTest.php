@@ -7,7 +7,7 @@ use BiomeBistro\Models\Restaurant;
 use BiomeBistro\Models\Biome;
 
 /**
- * Unit tests for Restaurant model
+ * Tests unitaires pour le modèle Restaurant
  */
 class RestaurantTest extends TestCase
 {
@@ -21,7 +21,7 @@ class RestaurantTest extends TestCase
         $this->restaurantModel = new Restaurant();
         $this->biomeModel = new Biome();
         
-        // Create a test biome for restaurant tests
+        // Créer un biome de test pour les tests de restaurants
         $biomeData = [
             'name' => 'Test Biome for Restaurants',
             'description' => 'Test biome',
@@ -42,7 +42,7 @@ class RestaurantTest extends TestCase
 
     protected function tearDown(): void
     {
-        // Clean up test data
+        // Nettoyer les données de test
         if ($this->testRestaurantId) {
             $this->restaurantModel->delete($this->testRestaurantId);
         }
@@ -52,7 +52,7 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test creating a new restaurant
+     * Teste la création d'un nouveau restaurant
      */
     public function testCreateRestaurant()
     {
@@ -101,11 +101,11 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test retrieving a restaurant by ID
+     * Teste la récupération d'un restaurant par son ID
      */
     public function testGetRestaurantById()
     {
-        // Create test restaurant
+        // Créer un restaurant de test
         $testData = [
             'name' => 'Retrieval Test Restaurant',
             'biome_id' => $this->testBiomeId,
@@ -144,7 +144,7 @@ class RestaurantTest extends TestCase
 
         $this->testRestaurantId = $this->restaurantModel->create($testData);
         
-        // Retrieve it
+        // Le récupérer
         $restaurant = $this->restaurantModel->getById($this->testRestaurantId);
 
         $this->assertNotNull($restaurant);
@@ -154,7 +154,7 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test getting all restaurants
+     * Teste la récupération de tous les restaurants
      */
     public function testGetAllRestaurants()
     {
@@ -172,7 +172,7 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test filtering restaurants
+     * Teste le filtrage des restaurants
      */
     public function testFilterRestaurants()
     {
@@ -185,7 +185,7 @@ class RestaurantTest extends TestCase
 
         $this->assertIsArray($filteredRestaurants);
         
-        // Each restaurant should meet filter criteria
+        // Chaque restaurant doit respecter les critères de filtrage
         foreach ($filteredRestaurants as $restaurant) {
             if (isset($restaurant['average_rating'])) {
                 $this->assertGreaterThanOrEqual(4.0, $restaurant['average_rating']);
@@ -194,7 +194,7 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test getting top rated restaurants
+     * Teste la récupération des restaurants les mieux notés
      */
     public function testGetTopRatedRestaurants()
     {
@@ -203,7 +203,7 @@ class RestaurantTest extends TestCase
         $this->assertIsArray($topRestaurants);
         $this->assertLessThanOrEqual(5, count($topRestaurants));
         
-        // Verify they are sorted by rating
+        // Vérifier qu'ils sont triés par note
         $previousRating = 5.0;
         foreach ($topRestaurants as $restaurant) {
             $this->assertLessThanOrEqual($previousRating, $restaurant['average_rating']);
@@ -212,11 +212,11 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test updating a restaurant
+     * Teste la mise à jour d'un restaurant
      */
     public function testUpdateRestaurant()
     {
-        // Create test restaurant
+        // Créer un restaurant de test
         $testData = [
             'name' => 'Original Restaurant Name',
             'biome_id' => $this->testBiomeId,
@@ -251,7 +251,7 @@ class RestaurantTest extends TestCase
 
         $this->testRestaurantId = $this->restaurantModel->create($testData);
 
-        // Update it
+        // Le mettre à jour
         $updateData = [
             'name' => 'Updated Restaurant Name',
             'description' => 'Updated description',
@@ -261,7 +261,7 @@ class RestaurantTest extends TestCase
         $result = $this->restaurantModel->update($this->testRestaurantId, $updateData);
         $this->assertTrue($result);
 
-        // Verify update
+        // Vérifier la mise à jour
         $updatedRestaurant = $this->restaurantModel->getById($this->testRestaurantId);
         $this->assertEquals('Updated Restaurant Name', $updatedRestaurant['name']);
         $this->assertEquals('Updated description', $updatedRestaurant['description']);
@@ -269,11 +269,11 @@ class RestaurantTest extends TestCase
     }
 
     /**
-     * Test deleting a restaurant
+     * Teste la suppression d'un restaurant
      */
     public function testDeleteRestaurant()
     {
-        // Create test restaurant
+        // Créer un restaurant de test
         $testData = [
             'name' => 'To Be Deleted Restaurant',
             'biome_id' => $this->testBiomeId,
@@ -308,19 +308,19 @@ class RestaurantTest extends TestCase
 
         $id = $this->restaurantModel->create($testData);
         
-        // Delete it
+        // Le supprimer
         $result = $this->restaurantModel->delete($id);
         $this->assertTrue($result);
 
-        // Verify deletion
+        // Vérifier la suppression
         $deletedRestaurant = $this->restaurantModel->getById($id);
         $this->assertNull($deletedRestaurant);
         
-        $this->testRestaurantId = null; // Already deleted
+        $this->testRestaurantId = null; // Déjà supprimé
     }
 
     /**
-     * Test search functionality
+     * Teste la fonctionnalité de recherche
      */
     public function testSearchRestaurants()
     {
@@ -329,8 +329,9 @@ class RestaurantTest extends TestCase
         
         $this->assertIsArray($results);
     }
+    
     /**
-     * Test count functionality
+     * Teste la fonctionnalité de comptage
      */
     public function testCountRestaurants()
     {

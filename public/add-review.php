@@ -1,6 +1,6 @@
 <?php
 /**
- * BiomeBistro - Add Review Page
+ * BiomeBistro - Page d'ajout d'avis
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -32,7 +32,7 @@ if (!$restaurant) {
     exit;
 }
 
-// Handle form submission
+// Traitement de la soumission du formulaire
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $reviewModel = new Review();
     
@@ -136,6 +136,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <a href="index.php"><?php echo Language::t('home'); ?></a>
                     <a href="biomes.php"><?php echo Language::t('biomes'); ?></a>
                     <a href="restaurants.php"><?php echo Language::t('restaurants'); ?></a>
+                    <a href="my-reservations.php?email=demo@example.com">
+                        <?php echo $lang === 'fr' ? 'Mes Réservations' : 'My Reservations'; ?>
+                    </a>
                 </nav>
                 <div class="language-switcher">
                     <a href="?restaurant=<?php echo $restaurantId; ?>&lang=fr" class="lang-btn <?php echo $lang === 'fr' ? 'active' : ''; ?>">🇫🇷 FR</a>
@@ -231,7 +234,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="/js/main.js"></script>
     <script src="/js/animations.js"></script>
     <script>
-        // Star rating functionality
+        // Fonctionnalité des étoiles de notation
         const stars = document.querySelectorAll('.star');
         const ratingInput = document.getElementById('rating-value');
         
@@ -240,7 +243,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 const rating = this.getAttribute('data-rating');
                 ratingInput.value = rating;
                 
-                // Update visual state
+                // Mettre à jour l'état visuel
                 stars.forEach((s, i) => {
                     if (i < rating) {
                         s.classList.add('active');
@@ -267,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             });
         });
         
-        // Initialize with current value
+        // Initialiser avec la valeur actuelle
         const initialRating = parseInt(ratingInput.value) || 0;
         if (initialRating > 0) {
             stars.forEach((s, i) => {

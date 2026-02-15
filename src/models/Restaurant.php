@@ -1,7 +1,7 @@
 <?php
 /**
- * Restaurant Model
- * Handles all restaurant-related database operations
+ * Modèle Restaurant
+ * Gère toutes les opérations de base de données liées aux restaurants
  */
 
 namespace BiomeBistro\Models;
@@ -19,12 +19,12 @@ class Restaurant {
     }
     
     /**
-     * Get all restaurants
+     * Récupère tous les restaurants
      * 
-     * @param array $filters Optional filters
-     * @param array $sort Optional sort criteria
-     * @param int $limit Optional limit
-     * @return array Array of restaurant documents
+     * @param array $filters Filtres optionnels
+     * @param array $sort Critères de tri optionnels
+     * @param int $limit Limite optionnelle
+     * @return array Tableau de documents restaurants
      */
     public function getAll(array $filters = [], array $sort = [], int $limit = 0): array {
         $options = [];
@@ -41,41 +41,41 @@ class Restaurant {
     }
     
     /**
-     * Get restaurant by ID
+     * Récupère un restaurant par son ID
      * 
-     * @param string $id Restaurant ID
-     * @return array|null Restaurant document or null
+     * @param string $id ID du restaurant
+     * @return array|null Document restaurant ou null
      */
     public function getById(string $id): ?array {
         try {
             $result = $this->collection->findOne(['_id' => new ObjectId($id)]);
             return $result ? (array)$result : null;
         } catch (\Exception $e) {
-            error_log("Error getting restaurant: " . $e->getMessage());
+            error_log("Erreur lors de la récupération du restaurant : " . $e->getMessage());
             return null;
         }
     }
     
     /**
-     * Get restaurants by biome
+     * Récupère les restaurants par biome
      * 
-     * @param string $biomeId Biome ID
-     * @return array Array of restaurants
+     * @param string $biomeId ID du biome
+     * @return array Tableau de restaurants
      */
     public function getByBiome(string $biomeId): array {
         try {
             return $this->collection->find(['biome_id' => new ObjectId($biomeId)])->toArray();
         } catch (\Exception $e) {
-            error_log("Error getting restaurants by biome: " . $e->getMessage());
+            error_log("Erreur lors de la récupération des restaurants par biome : " . $e->getMessage());
             return [];
         }
     }
     
     /**
-     * Count restaurants by biome
+     * Compte les restaurants par biome
      * 
-     * @param string $biomeId Biome ID
-     * @return int Count
+     * @param string $biomeId ID du biome
+     * @return int Compteur
      */
     public function countByBiome(string $biomeId): int {
         try {
@@ -86,10 +86,10 @@ class Restaurant {
     }
     
     /**
-     * Get top-rated restaurants
+     * Récupère les restaurants les mieux notés
      * 
-     * @param int $limit Number of restaurants to return
-     * @return array Array of top-rated restaurants
+     * @param int $limit Nombre de restaurants à retourner
+     * @return array Tableau des restaurants les mieux notés
      */
     public function getTopRated(int $limit = 4): array {
         return $this->getAll(
@@ -100,62 +100,62 @@ class Restaurant {
     }
     
     /**
-     * Search restaurants
+     * Recherche des restaurants
      * 
-     * @param string $query Search query
-     * @return array Array of matching restaurants
+     * @param string $query Requête de recherche
+     * @return array Tableau de restaurants correspondants
      */
     public function search(string $query): array {
-        // Text search on name and description
+        // Recherche textuelle sur le nom et la description
         return $this->collection->find([
             '$text' => ['$search' => $query]
         ])->toArray();
     }
     
     /**
-     * Advanced filter/search
+     * Filtrage/recherche avancé
      * 
-     * @param array $params Filter parameters
-     * @return array Array of restaurants
+     * @param array $params Paramètres de filtrage
+     * @return array Tableau de restaurants
      */
     public function filter(array $params): array {
         $filters = [];
         
-        // Biome filter
+        // Filtre par biome
         if (!empty($params['biome_id'])) {
             try {
                 $filters['biome_id'] = new ObjectId($params['biome_id']);
             } catch (\Exception $e) {
-                // Invalid ObjectId, skip filter
+                // ObjectId invalide, ignorer le filtre
             }
         }
         
-        // Price range filter
+        // Filtre par gamme de prix
         if (!empty($params['price_range'])) {
             $filters['price_range'] = $params['price_range'];
         }
         
-        // Rating filter (minimum rating)
+        // Filtre par note (note minimum)
         if (!empty($params['min_rating'])) {
             $filters['average_rating'] = ['$gte' => (float)$params['min_rating']];
         }
         
-        // Status filter (open/closed)
+        // Filtre par statut (ouvert/fermé)
         if (!empty($params['status'])) {
             $filters['status'] = $params['status'];
         }
         
-        // Text search
+        // Recherche textuelle
         if (!empty($params['search'])) {
             $filters['$text'] = ['$search' => $params['search']];
         }
         
-        // Cuisine style
+        // Style de cuisine
         if (!empty($params['cuisine_style'])) {
             $filters['cuisine_style'] = ['$regex' => $params['cuisine_style'], '$options' => 'i'];
         }
         
-        // Sort options
+        // Options de tri
         $sort = [];
         if (!empty($params['sort_by'])) {
             switch ($params['sort_by']) {
@@ -183,25 +183,25 @@ class Restaurant {
     }
     
     /**
-     * Get nearby restaurants using GPS coordinates
+     * Récupère les restaurants à proximité en utilisant les coordonnées GPS
      * 
-     * @param float $latitude
-     * @param float $longitude
-     * @param float $radiusKm Radius in kilometers
-     * @return array Array of nearby restaurants with distances
+     * @param float $latitude Latitude
+     * @param float $longitude Longitude
+     * @param float $radiusKm Rayon en kilomètres
+     * @return array Tableau de restaurants proches avec leurs distances
      */
     public function getNearby(float $latitude, float $longitude, float $radiusKm = 10): array {
         $query = GeoCalculator::getNearbyQuery($latitude, $longitude, $radiusKm);
         $restaurants = $this->collection->find($query)->toArray();
         
-        // Add distance to each restaurant
+        // Ajouter la distance à chaque restaurant
         foreach ($restaurants as &$restaurant) {
             if (isset($restaurant['location']['coordinates'])) {
                 $coords = $restaurant['location']['coordinates'];
                 $distance = GeoCalculator::calculateDistance(
                     $latitude,
                     $longitude,
-                    $coords[1], // MongoDB stores [lon, lat]
+                    $coords[1], // MongoDB stocke [lon, lat]
                     $coords[0]
                 );
                 $restaurant['distance_km'] = $distance;
@@ -212,21 +212,21 @@ class Restaurant {
     }
     
     /**
-     * Create a new restaurant
+     * Crée un nouveau restaurant
      * 
-     * @param array $data Restaurant data
-     * @return string|null Inserted ID or null on failure
+     * @param array $data Données du restaurant
+     * @return string|null ID inséré ou null en cas d'échec
      */
     public function create(array $data): ?string {
         try {
-            // Set default values
+            // Définir les valeurs par défaut
             $data['average_rating'] = $data['average_rating'] ?? 0;
             $data['total_reviews'] = $data['total_reviews'] ?? 0;
             $data['status'] = $data['status'] ?? 'open';
             $data['created_at'] = new UTCDateTime();
             $data['updated_at'] = new UTCDateTime();
             
-            // Convert biome_id to ObjectId if it's a string
+            // Convertir biome_id en ObjectId s'il s'agit d'une chaîne
             if (isset($data['biome_id']) && is_string($data['biome_id'])) {
                 $data['biome_id'] = new ObjectId($data['biome_id']);
             }
@@ -234,23 +234,23 @@ class Restaurant {
             $result = $this->collection->insertOne($data);
             return (string)$result->getInsertedId();
         } catch (\Exception $e) {
-            error_log("Error creating restaurant: " . $e->getMessage());
+            error_log("Erreur lors de la création du restaurant : " . $e->getMessage());
             return null;
         }
     }
     
     /**
-     * Update a restaurant
+     * Met à jour un restaurant
      * 
-     * @param string $id Restaurant ID
-     * @param array $data Updated data
-     * @return bool Success status
+     * @param string $id ID du restaurant
+     * @param array $data Données mises à jour
+     * @return bool Statut de succès
      */
     public function update(string $id, array $data): bool {
         try {
             $data['updated_at'] = new UTCDateTime();
             
-            // Convert biome_id to ObjectId if present and is string
+            // Convertir biome_id en ObjectId s'il est présent et est une chaîne
             if (isset($data['biome_id']) && is_string($data['biome_id'])) {
                 $data['biome_id'] = new ObjectId($data['biome_id']);
             }
@@ -261,36 +261,36 @@ class Restaurant {
             );
             return $result->getModifiedCount() > 0 || $result->getMatchedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error updating restaurant: " . $e->getMessage());
+            error_log("Erreur lors de la mise à jour du restaurant : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Delete a restaurant
+     * Supprime un restaurant
      * 
-     * @param string $id Restaurant ID
-     * @return bool Success status
+     * @param string $id ID du restaurant
+     * @return bool Statut de succès
      */
     public function delete(string $id): bool {
         try {
             $result = $this->collection->deleteOne(['_id' => new ObjectId($id)]);
             return $result->getDeletedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error deleting restaurant: " . $e->getMessage());
+            error_log("Erreur lors de la suppression du restaurant : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Update restaurant rating (called when new review is added)
+     * Met à jour la note du restaurant (appelé lorsqu'un nouvel avis est ajouté)
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return bool Success status
+     * @param string $restaurantId ID du restaurant
+     * @return bool Statut de succès
      */
     public function updateRating(string $restaurantId): bool {
         try {
-            // Calculate average rating from all reviews
+            // Calculer la note moyenne à partir de tous les avis
             $reviewModel = new Review();
             $reviews = $reviewModel->getByRestaurant($restaurantId);
             
@@ -311,18 +311,18 @@ class Restaurant {
                 'total_reviews' => $totalReviews
             ]);
         } catch (\Exception $e) {
-            error_log("Error updating restaurant rating: " . $e->getMessage());
+            error_log("Erreur lors de la mise à jour de la note du restaurant : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Check if restaurant is open at a given time
+     * Vérifie si le restaurant est ouvert à une heure donnée
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param string $day Day of week (e.g., "Monday")
-     * @param string $time Time in HH:MM format
-     * @return bool True if open
+     * @param string $restaurantId ID du restaurant
+     * @param string $day Jour de la semaine (par ex., "Monday")
+     * @param string $time Heure au format HH:MM
+     * @return bool True si ouvert
      */
     public function isOpenAt(string $restaurantId, string $day, string $time): bool {
         $restaurant = $this->getById($restaurantId);
@@ -341,11 +341,11 @@ class Restaurant {
     }
     
     /**
-     * Get similar restaurants (same biome, different restaurant)
+     * Récupère des restaurants similaires (même biome, restaurant différent)
      * 
-     * @param string $restaurantId Current restaurant ID
-     * @param int $limit Number of similar restaurants to return
-     * @return array Array of similar restaurants
+     * @param string $restaurantId ID du restaurant actuel
+     * @param int $limit Nombre de restaurants similaires à retourner
+     * @return array Tableau de restaurants similaires
      */
     public function getSimilar(string $restaurantId, int $limit = 3): array {
         $restaurant = $this->getById($restaurantId);
@@ -371,9 +371,9 @@ class Restaurant {
     }
     
     /**
-     * Get count of all restaurants
+     * Récupère le nombre total de restaurants
      * 
-     * @return int Total count
+     * @return int Compteur total
      */
     public function count(): int {
         return $this->collection->countDocuments([]);

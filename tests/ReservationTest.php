@@ -9,7 +9,7 @@ use BiomeBistro\Models\Biome;
 use BiomeBistro\Utils\Validator;
 
 /**
- * Unit tests for Reservation model
+ * Tests unitaires pour le modèle Reservation
  */
 class ReservationTest extends TestCase
 {
@@ -26,7 +26,7 @@ class ReservationTest extends TestCase
         $this->restaurantModel = new Restaurant();
         $this->biomeModel = new Biome();
         
-        // Create test biome
+        // Créer un biome de test
         $biomeData = [
             'name' => 'Test Biome for Reservations',
             'description' => 'Test biome',
@@ -39,7 +39,7 @@ class ReservationTest extends TestCase
         ];
         $this->testBiomeId = $this->biomeModel->create($biomeData);
         
-        // Create test restaurant
+        // Créer un restaurant de test
         $restaurantData = [
             'name' => 'Test Restaurant for Reservations',
             'biome_id' => $this->testBiomeId,
@@ -85,7 +85,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test creating a reservation
+     * Teste la création d'une réservation
      */
     public function testCreateReservation()
     {
@@ -110,7 +110,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test retrieving a reservation by ID
+     * Teste la récupération d'une réservation par son ID
      */
     public function testGetReservationById()
     {
@@ -138,11 +138,11 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test getting reservations by restaurant
+     * Teste la récupération des réservations par restaurant
      */
     public function testGetReservationsByRestaurant()
     {
-        // Create multiple reservations
+        // Créer plusieurs réservations
         for ($i = 1; $i <= 3; $i++) {
             $testData = [
                 'restaurant_id' => $this->testRestaurantId,
@@ -171,7 +171,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test updating a reservation status
+     * Teste la mise à jour du statut d'une réservation
      */
     public function testUpdateReservationStatus()
     {
@@ -191,18 +191,18 @@ class ReservationTest extends TestCase
 
         $this->testReservationId = $this->reservationModel->create($testData);
 
-        // Update status
+        // Mettre à jour le statut
         $updateData = ['status' => 'confirmed'];
         $result = $this->reservationModel->update($this->testReservationId, $updateData);
         $this->assertTrue($result);
 
-        // Verify
+        // Vérifier
         $updated = $this->reservationModel->getById($this->testReservationId);
         $this->assertEquals('confirmed', $updated['status']);
     }
 
     /**
-     * Test deleting a reservation
+     * Teste la suppression d'une réservation
      */
     public function testDeleteReservation()
     {
@@ -232,7 +232,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test email validation
+     * Teste la validation d'email
      */
     public function testEmailValidation()
     {
@@ -243,7 +243,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test phone validation
+     * Teste la validation de téléphone
      */
     public function testPhoneValidation()
     {
@@ -253,18 +253,18 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test date validation
+     * Teste la validation de date
      */
     public function testDateValidation()
     {
         $this->assertTrue(Validator::validateDate('2026-12-31'));
         $this->assertTrue(Validator::validateDate('2026-01-01'));
-        $this->assertFalse(Validator::validateDate('2026-13-01')); // Invalid month
-        $this->assertFalse(Validator::validateDate('31-12-2026')); // Wrong format
+        $this->assertFalse(Validator::validateDate('2026-13-01')); // Mois invalide
+        $this->assertFalse(Validator::validateDate('31-12-2026')); // Mauvais format
     }
 
     /**
-     * Test party size validation
+     * Teste la validation de la taille du groupe
      */
     public function testPartySizeValidation()
     {
@@ -277,7 +277,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test reservation validation
+     * Teste la validation d'une réservation
      */
     public function testReservationValidation()
     {
@@ -300,7 +300,7 @@ class ReservationTest extends TestCase
     }
 
     /**
-     * Test invalid reservation data
+     * Teste les données de réservation invalides
      */
     public function testInvalidReservationData()
     {

@@ -1,6 +1,6 @@
 <?php
 /**
- * BiomeBistro - Restaurant Detail Page
+ * BiomeBistro - Page de détail d'un restaurant
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -16,17 +16,20 @@ Language::init();
 Language::setLanguage($_SESSION['lang'] ?? 'fr');
 $lang = Language::getCurrentLanguage();
 
+// Récupération de l'ID du restaurant depuis l'URL
 $restaurantId = $_GET['id'] ?? null;
 if (!$restaurantId) {
     header('Location: restaurants.php');
     exit;
 }
 
+// Initialisation des modèles
 $restaurantModel = new Restaurant();
 $biomeModel = new Biome();
 $menuModel = new MenuItem();
 $reviewModel = new Review();
 
+// Récupération des données du restaurant
 $restaurant = $restaurantModel->getById($restaurantId);
 
 if (!$restaurant) {
@@ -34,11 +37,12 @@ if (!$restaurant) {
     exit;
 }
 
+// Récupération des données associées
 $biome = $biomeModel->getById((string)$restaurant['biome_id']);
 $menuItems = $menuModel->getByRestaurant($restaurantId);
 $reviews = $reviewModel->getByRestaurant($restaurantId);
 
-// Group menu items by category
+// Regrouper les éléments du menu par catégorie
 $menuByCategory = [];
 foreach ($menuItems as $item) {
     $category = $item['category'] ?? 'Other';
@@ -57,6 +61,7 @@ foreach ($menuItems as $item) {
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <style>
+        /* En-tête de la page de détail avec dégradé personnalisé selon le biome */
         .detail-header {
             background: linear-gradient(135deg, <?php echo $biome['color_theme'] ?? '#27AE60'; ?> 0%, #2C3E50 100%);
             color: white;
@@ -93,6 +98,7 @@ foreach ($menuItems as $item) {
             padding: 1.5rem; 
             border-radius: 12px; 
         }
+        /* Système d'onglets pour organiser le contenu */
         .tabs {
             display: flex;
             gap: var(--spacing-sm);
@@ -125,6 +131,7 @@ foreach ($menuItems as $item) {
         .tab-content.active {
             display: block;
         }
+        /* Styles pour les catégories du menu */
         .menu-category {
             margin-bottom: var(--spacing-xl);
         }
@@ -135,6 +142,7 @@ foreach ($menuItems as $item) {
             padding-bottom: var(--spacing-sm);
             border-bottom: 2px solid var(--border-color);
         }
+        /* Style pour chaque élément du menu */
         .menu-item {
             display: flex;
             justify-content: space-between;
@@ -166,6 +174,7 @@ foreach ($menuItems as $item) {
             margin-left: var(--spacing-md);
             white-space: nowrap;
         }
+        /* Style pour les avis clients */
         .review-item {
             background: white;
             border: 2px solid var(--border-color);
@@ -179,9 +188,99 @@ foreach ($menuItems as $item) {
             align-items: center;
             margin-bottom: var(--spacing-sm);
         }
+        /* Amélioration de la visibilité des sections d'information */
+        .info-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .info-card {
+            background: white;
+            padding: 1.25rem;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .info-card h4 {
+            color: var(--primary-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card p,
+        .info-card ul {
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .info-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-card li {
+            padding: 0.4rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .info-card li:last-child {
+            border-bottom: none;
+        }
+
+        /* Score de durabilité mis en valeur avec un style distinctif */
+        .sustainability-score {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .sustainability-score h4 {
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .score-number {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Amélioration de l'onglet Info */
+        #tab-info .info-grid {
+            margin-top: 1.5rem;
+        }
     </style>
 </head>
 <body>
+    <!-- En-tête principale avec navigation -->
     <header class="main-header">
         <div class="container">
             <div class="header-content">
@@ -190,6 +289,9 @@ foreach ($menuItems as $item) {
                     <a href="index.php"><?php echo Language::t('home'); ?></a>
                     <a href="biomes.php"><?php echo Language::t('biomes'); ?></a>
                     <a href="restaurants.php"><?php echo Language::t('restaurants'); ?></a>
+                    <a href="my-reservations.php?email=demo@example.com">
+                        <?php echo $lang === 'fr' ? 'Mes Réservations' : 'My Reservations'; ?>
+                     </a>
                 </nav>
                 <div class="language-switcher">
                     <a href="?id=<?php echo $restaurantId; ?>&lang=fr" class="lang-btn <?php echo $lang === 'fr' ? 'active' : ''; ?>">🇫🇷 FR</a>
@@ -199,6 +301,7 @@ foreach ($menuItems as $item) {
         </div>
     </header>
 
+    <!-- Section d'en-tête du restaurant avec badge biome et informations principales -->
     <section class="detail-header">
         <div class="container">
             <div class="restaurant-badge" style="background: <?php echo $biome['color_theme']; ?>; display: inline-block; padding: 0.5rem 1rem; border-radius: 5px; margin-bottom: 1rem;" data-biome="<?php echo htmlspecialchars($biome['name']); ?>">
@@ -206,6 +309,7 @@ foreach ($menuItems as $item) {
             </div>
             <h1 class="detail-title"><?php echo htmlspecialchars($restaurant['name']); ?></h1>
             <div class="detail-meta">
+                <!-- Affichage de la note moyenne avec étoiles -->
                 <div>
                     <?php for ($i = 1; $i <= 5; $i++) echo $i <= $restaurant['average_rating'] ? '⭐' : '☆'; ?>
                     <?php echo number_format($restaurant['average_rating'], 1); ?> (<?php echo $restaurant['total_reviews']; ?>)
@@ -214,6 +318,7 @@ foreach ($menuItems as $item) {
                 <div>🍽️ <?php echo htmlspecialchars($restaurant['cuisine_style']); ?></div>
                 <div>📍 <?php echo htmlspecialchars($restaurant['location']['district']); ?></div>
             </div>
+            <!-- Boutons d'action principaux -->
             <div style="margin-top: 2rem;">
                 <a href="make-reservation.php?restaurant=<?php echo $restaurantId; ?>" class="btn btn-primary">📅 <?php echo Language::t('book_table'); ?></a>
                 <a href="add-review.php?restaurant=<?php echo $restaurantId; ?>" class="btn btn-secondary">✍️ <?php echo Language::t('write_review'); ?></a>
@@ -221,9 +326,10 @@ foreach ($menuItems as $item) {
         </div>
     </section>
 
+    <!-- Section principale avec système d'onglets -->
     <section class="top-rated-section">
         <div class="container">
-            <!-- Tabs -->
+            <!-- Navigation par onglets -->
             <div class="tabs">
                 <button class="tab active" onclick="switchTab('about')">
                     <?php echo Language::t('about'); ?>
@@ -239,12 +345,13 @@ foreach ($menuItems as $item) {
                 </button>
             </div>
 
-            <!-- Tab: About -->
+            <!-- Onglet : À propos du restaurant -->
             <div id="tab-about" class="tab-content active">
                 <h2><?php echo Language::t('about'); ?></h2>
                 <p style="font-size: 1.1rem; line-height: 1.8;"><?php echo htmlspecialchars($restaurant['description']); ?></p>
                 
                 <div class="info-grid">
+                    <!-- Carte : Ambiance du restaurant -->
                     <div class="info-card">
                         <h3><?php echo Language::t('atmosphere'); ?></h3>
                         <p><strong><?php echo $lang === 'fr' ? 'Musique' : 'Music'; ?>:</strong> <?php echo htmlspecialchars($restaurant['atmosphere']['music'] ?? 'N/A'); ?></p>
@@ -252,6 +359,7 @@ foreach ($menuItems as $item) {
                         <p><strong><?php echo $lang === 'fr' ? 'Décor' : 'Decor'; ?>:</strong> <?php echo htmlspecialchars($restaurant['atmosphere']['decor'] ?? 'N/A'); ?></p>
                     </div>
                     
+                    <!-- Carte : Équipements et services -->
                     <div class="info-card">
                         <h3><?php echo $lang === 'fr' ? 'Équipements' : 'Features'; ?></h3>
                         <ul>
@@ -261,6 +369,7 @@ foreach ($menuItems as $item) {
                         </ul>
                     </div>
                     
+                    <!-- Carte : Score de durabilité environnementale -->
                     <div class="info-card">
                         <h3><?php echo $lang === 'fr' ? 'Score de durabilité' : 'Sustainability Score'; ?></h3>
                         <p style="font-size: 2rem; font-weight: bold; color: var(--primary-color);">
@@ -270,15 +379,17 @@ foreach ($menuItems as $item) {
                 </div>
             </div>
 
-            <!-- Tab: Menu -->
+            <!-- Onglet : Menu du restaurant -->
             <div id="tab-menu" class="tab-content">
                 <h2><?php echo Language::t('menu'); ?></h2>
                 
                 <?php if (empty($menuByCategory)): ?>
+                    <!-- Message si aucun menu n'est disponible -->
                     <p style="text-align: center; padding: 2rem; color: var(--text-light);">
                         <?php echo $lang === 'fr' ? 'Menu à venir...' : 'Menu coming soon...'; ?>
                     </p>
                 <?php else: ?>
+                    <!-- Affichage des plats groupés par catégorie -->
                     <?php foreach ($menuByCategory as $category => $items): ?>
                         <div class="menu-category">
                             <h3><?php echo htmlspecialchars($category); ?></h3>
@@ -306,15 +417,17 @@ foreach ($menuItems as $item) {
                 <?php endif; ?>
             </div>
 
-            <!-- Tab: Reviews -->
+            <!-- Onglet : Avis des clients -->
             <div id="tab-reviews" class="tab-content">
                 <h2><?php echo Language::t('reviews'); ?> (<?php echo $restaurant['total_reviews']; ?>)</h2>
                 
                 <?php if (empty($reviews)): ?>
+                    <!-- Message si aucun avis n'est disponible -->
                     <p style="text-align: center; padding: 2rem; color: var(--text-light);">
                         <?php echo $lang === 'fr' ? 'Aucun avis pour le moment. Soyez le premier à laisser un avis !' : 'No reviews yet. Be the first to leave a review!'; ?>
                     </p>
                 <?php else: ?>
+                    <!-- Affichage de chaque avis client -->
                     <?php foreach ($reviews as $review): ?>
                         <div class="review-item">
                             <div class="review-header">
@@ -350,11 +463,12 @@ foreach ($menuItems as $item) {
                 </a>
             </div>
 
-            <!-- Tab: Info -->
+            <!-- Onglet : Informations de contact et horaires -->
             <div id="tab-info" class="tab-content">
                 <h2><?php echo Language::t('contact'); ?> & <?php echo Language::t('opening_hours'); ?></h2>
                 
                 <div class="info-grid">
+                    <!-- Carte : Coordonnées de contact -->
                     <div class="info-card">
                         <h3><?php echo Language::t('contact'); ?></h3>
                         <p>📞 <?php echo htmlspecialchars($restaurant['contact']['phone'] ?? 'N/A'); ?></p>
@@ -362,6 +476,7 @@ foreach ($menuItems as $item) {
                         <p>🌐 <?php echo htmlspecialchars($restaurant['contact']['website'] ?? 'N/A'); ?></p>
                     </div>
                     
+                    <!-- Carte : Localisation et capacité -->
                     <div class="info-card">
                         <h3><?php echo Language::t('location'); ?></h3>
                         <p>📍 <?php echo htmlspecialchars($restaurant['location']['address']); ?></p>
@@ -369,6 +484,7 @@ foreach ($menuItems as $item) {
                         <p>👥 <?php echo Language::t('capacity'); ?>: <?php echo $restaurant['capacity']; ?> <?php echo $lang === 'fr' ? 'personnes' : 'people'; ?></p>
                     </div>
                     
+                    <!-- Carte : Horaires d'ouverture -->
                     <div class="info-card">
                         <h3><?php echo Language::t('opening_hours'); ?></h3>
                         <?php foreach ($restaurant['opening_hours'] as $hours): ?>
@@ -383,6 +499,7 @@ foreach ($menuItems as $item) {
         </div>
     </section>
 
+    <!-- Pied de page -->
     <footer class="main-footer">
         <div class="container">
             <div class="footer-bottom">
@@ -394,19 +511,20 @@ foreach ($menuItems as $item) {
     <script src="/js/main.js"></script>
     <script src="/js/animations.js"></script>
     <script>
+        // Fonction pour changer d'onglet actif
         function switchTab(tabName) {
-            // Hide all tab contents
+            // Masquer tous les contenus d'onglets
             const tabContents = document.querySelectorAll('.tab-content');
             tabContents.forEach(content => content.classList.remove('active'));
             
-            // Remove active class from all tabs
+            // Retirer la classe active de tous les onglets
             const tabs = document.querySelectorAll('.tab');
             tabs.forEach(tab => tab.classList.remove('active'));
             
-            // Show selected tab content
+            // Afficher le contenu de l'onglet sélectionné
             document.getElementById('tab-' + tabName).classList.add('active');
             
-            // Add active class to clicked tab
+            // Ajouter la classe active à l'onglet cliqué
             event.target.classList.add('active');
         }
     </script>

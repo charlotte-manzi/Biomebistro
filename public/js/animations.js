@@ -1,9 +1,9 @@
 /**
- * BiomeBistro - Animated Backgrounds Generator
- * Creates dynamic particle effects based on biome type
+ * BiomeBistro - Générateur de Fonds Animés
+ * Crée des effets de particules dynamiques selon le type de biome
  */
 
-// Biome configurations
+// Configurations des biomes
 const biomeConfigs = {
     'tropical': {
         particles: 20,
@@ -54,13 +54,13 @@ const biomeConfigs = {
 };
 
 /**
- * Initialize animated background
+ * Initialise le fond animé
  */
 function initAnimatedBackground(biomeName) {
-    // Clean biome name
+    // Nettoyer le nom du biome
     biomeName = biomeName.toLowerCase().replace(/\s+/g, '');
     
-    // Find matching config
+    // Trouver la configuration correspondante
     let config = null;
     for (let key in biomeConfigs) {
         if (biomeName.includes(key)) {
@@ -70,34 +70,34 @@ function initAnimatedBackground(biomeName) {
     }
     
     if (!config) {
-        console.log('No animation config for biome:', biomeName);
+        console.log('Aucune configuration d\'animation pour le biome :', biomeName);
         return;
     }
     
-    // Create container
+    // Créer le conteneur
     const container = document.createElement('div');
     container.className = 'animated-background';
     
-    // Add gradient background
+    // Ajouter le fond dégradé
     const gradient = document.createElement('div');
     gradient.className = `bg-gradient bg-${Object.keys(biomeConfigs).find(k => biomeName.includes(k))}`;
     container.appendChild(gradient);
     
-    // Add particles container
+    // Ajouter le conteneur de particules
     const particlesContainer = document.createElement('div');
     particlesContainer.className = 'particles';
     
-    // Generate particles
+    // Générer les particules
     for (let i = 0; i < config.particles; i++) {
         const particle = document.createElement('div');
         particle.className = `particle ${config.className}`;
         
-        // Random positioning
+        // Positionnement aléatoire
         particle.style.left = Math.random() * 100 + '%';
         particle.style.animationDelay = Math.random() * 10 + 's';
         particle.style.animationDuration = (Math.random() * 5 + 5) + 's';
         
-        // Random size variation
+        // Variation de taille aléatoire
         const scale = 0.7 + Math.random() * 0.6;
         particle.style.transform = `scale(${scale})`;
         
@@ -106,13 +106,13 @@ function initAnimatedBackground(biomeName) {
     
     container.appendChild(particlesContainer);
     
-    // Add extra effects
+    // Ajouter les effets supplémentaires
     if (config.extras) {
         config.extras.forEach((extraClass, index) => {
             const extra = document.createElement('div');
             extra.className = extraClass;
             
-            // Position extras
+            // Positionner les effets supplémentaires
             if (extraClass.includes('sunray')) {
                 extra.style.left = (20 + index * 30) + '%';
             } else if (extraClass.includes('glow')) {
@@ -127,24 +127,24 @@ function initAnimatedBackground(biomeName) {
         });
     }
     
-    // Insert at the beginning of body
+    // Insérer au début du body
     document.body.insertBefore(container, document.body.firstChild);
 }
 
 /**
- * Auto-detect biome from page and initialize
+ * Détecte automatiquement le biome de la page et initialise l'animation
  */
 document.addEventListener('DOMContentLoaded', function() {
-    // Try to detect biome from page content
+    // Tenter de détecter le biome depuis le contenu de la page
     let biomeName = null;
     
-    // Method 1: Look for biome badge
+    // Méthode 1 : Rechercher le badge de biome
     const biomeBadge = document.querySelector('.restaurant-badge, .biome-badge');
     if (biomeBadge) {
         biomeName = biomeBadge.textContent.trim();
     }
     
-    // Method 2: Look for biome data attribute
+    // Méthode 2 : Rechercher l'attribut data-biome
     if (!biomeName) {
         const biomeElement = document.querySelector('[data-biome]');
         if (biomeElement) {
@@ -152,7 +152,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Method 3: Check page title or meta
+    // Méthode 3 : Vérifier le titre ou les méta de la page
     if (!biomeName) {
         const title = document.title;
         for (let key in biomeConfigs) {
@@ -163,34 +163,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Initialize if biome detected
+    // Initialiser si un biome est détecté
     if (biomeName) {
-        console.log('Initializing animation for biome:', biomeName);
+        console.log('Initialisation de l\'animation pour le biome :', biomeName);
         initAnimatedBackground(biomeName);
     } else {
-        // Default homepage animation (mix of all)
+        // Animation par défaut pour la page d'accueil (mélange de tous les biomes)
         initHomepageAnimation();
     }
     
-    // Add page transition effect
+    // Ajouter l'effet de transition de page
     document.body.classList.add('page-transition');
 });
 
 /**
- * Homepage mixed animation
+ * Animation mixte pour la page d'accueil
  */
 function initHomepageAnimation() {
     const container = document.createElement('div');
     container.className = 'animated-background';
     
-    // Gradient that shifts through biome colors
+    // Dégradé qui transite entre les couleurs des biomes
     const gradient = document.createElement('div');
     gradient.className = 'bg-gradient';
     gradient.style.background = 'linear-gradient(135deg, #27AE60 0%, #3498DB 50%, #9B59B6 100%)';
     gradient.style.backgroundSize = '200% 200%';
     gradient.style.animation = 'gradientMove 20s ease infinite';
     
-    // Add keyframe for gradient movement
+    // Ajouter l'animation du dégradé si absente
     if (!document.querySelector('#gradient-move-style')) {
         const style = document.createElement('style');
         style.id = 'gradient-move-style';
@@ -206,7 +206,7 @@ function initHomepageAnimation() {
     
     container.appendChild(gradient);
     
-    // Add some gentle floating particles
+    // Ajouter des particules flottantes légères
     const particlesContainer = document.createElement('div');
     particlesContainer.className = 'particles';
     
@@ -225,7 +225,7 @@ function initHomepageAnimation() {
         particlesContainer.appendChild(particle);
     }
     
-    // Add gentle float animation
+    // Ajouter l'animation de flottement doux si absente
     if (!document.querySelector('#gentle-float-style')) {
         const style = document.createElement('style');
         style.id = 'gentle-float-style';
@@ -243,7 +243,7 @@ function initHomepageAnimation() {
     document.body.insertBefore(container, document.body.firstChild);
 }
 
-// Export for use in other scripts
+// Exporter pour utilisation dans d'autres scripts
 window.BiomeAnimations = {
     init: initAnimatedBackground,
     homepage: initHomepageAnimation

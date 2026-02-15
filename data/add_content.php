@@ -1,7 +1,7 @@
 <?php
 /**
- * Add Menu Items and Reviews to BiomeBistro
- * Run this after import_sample_data.php
+ * Ajouter des articles de menu et des avis à BiomeBistro
+ * À exécuter après import_sample_data.php
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -11,42 +11,42 @@ use BiomeBistro\Models\MenuItem;
 use BiomeBistro\Models\Review;
 use MongoDB\BSON\UTCDateTime;
 
-echo "🍽️  BiomeBistro - Adding Menu Items & Reviews\n";
+echo "🍽️  BiomeBistro - Ajout des articles de menu & avis\n";
 echo "=============================================\n\n";
 
 $restaurantModel = new Restaurant();
 $menuModel = new MenuItem();
 $reviewModel = new Review();
 
-// Get all restaurants
+// Récupérer tous les restaurants
 $restaurants = $restaurantModel->getAll();
 
-echo "📋 Adding menu items...\n";
+echo "📋 Ajout des articles de menu...\n";
 
-// Menu items by category
+// Articles de menu par catégorie
 $menuTemplates = [
-    'Starters' => [
-        ['name' => 'Seasonal Soup', 'desc' => 'Chef\'s daily creation with local ingredients', 'price' => 8.50],
-        ['name' => 'Garden Salad', 'desc' => 'Fresh greens with house dressing', 'price' => 9.00],
-        ['name' => 'Artisan Bread Basket', 'desc' => 'Warm bread with infused butter', 'price' => 6.50],
-        ['name' => 'Crispy Appetizer', 'desc' => 'Seasonal crispy bites with dipping sauce', 'price' => 11.00],
+    'Entrées' => [
+        ['name' => 'Seasonal Soup', 'desc' => 'Création du chef avec des ingrédients locaux', 'price' => 8.50],
+        ['name' => 'Garden Salad', 'desc' => 'Feuilles fraîches avec vinaigrette maison', 'price' => 9.00],
+        ['name' => 'Artisan Bread Basket', 'desc' => 'Pain chaud avec beurre aromatisé', 'price' => 6.50],
+        ['name' => 'Crispy Appetizer', 'desc' => 'Bouchées croustillantes de saison avec sauce', 'price' => 11.00],
     ],
-    'Main Courses' => [
-        ['name' => 'Grilled Specialty', 'desc' => 'Chef\'s signature grilled dish', 'price' => 24.00],
-        ['name' => 'Braised Delight', 'desc' => 'Slow-cooked perfection with seasonal vegetables', 'price' => 26.50],
-        ['name' => 'Vegetarian Harmony', 'desc' => 'Plant-based masterpiece', 'price' => 19.50],
-        ['name' => 'Ocean Treasure', 'desc' => 'Fresh catch of the day', 'price' => 28.00],
-        ['name' => 'Traditional Classic', 'desc' => 'Time-honored recipe with modern twist', 'price' => 22.00],
+    'Plats Principaux' => [
+        ['name' => 'Grilled Specialty', 'desc' => 'Plat grillé signature du chef', 'price' => 24.00],
+        ['name' => 'Braised Delight', 'desc' => 'Mijoté lentement avec légumes de saison', 'price' => 26.50],
+        ['name' => 'Vegetarian Harmony', 'desc' => 'Chef-d\'œuvre à base de plantes', 'price' => 19.50],
+        ['name' => 'Ocean Treasure', 'desc' => 'Poisson du jour frais', 'price' => 28.00],
+        ['name' => 'Traditional Classic', 'desc' => 'Recette traditionnelle avec touche moderne', 'price' => 22.00],
     ],
     'Desserts' => [
-        ['name' => 'Chocolate Dream', 'desc' => 'Rich chocolate creation', 'price' => 9.50],
-        ['name' => 'Seasonal Fruit Tart', 'desc' => 'Fresh fruits on buttery crust', 'price' => 8.50],
-        ['name' => 'Ice Cream Selection', 'desc' => 'Artisan flavors', 'price' => 7.00],
+        ['name' => 'Chocolate Dream', 'desc' => 'Riche création au chocolat', 'price' => 9.50],
+        ['name' => 'Seasonal Fruit Tart', 'desc' => 'Fruits frais sur pâte beurrée', 'price' => 8.50],
+        ['name' => 'Ice Cream Selection', 'desc' => 'Saveurs artisanales', 'price' => 7.00],
     ],
-    'Beverages' => [
-        ['name' => 'House Wine', 'desc' => 'Red or white, by the glass', 'price' => 7.50],
-        ['name' => 'Signature Cocktail', 'desc' => 'Mixologist\'s creation', 'price' => 12.00],
-        ['name' => 'Fresh Juice', 'desc' => 'Seasonal pressed juice', 'price' => 5.50],
+    'Boissons' => [
+        ['name' => 'House Wine', 'desc' => 'Rouge ou blanc, au verre', 'price' => 7.50],
+        ['name' => 'Signature Cocktail', 'desc' => 'Création du mixologue', 'price' => 12.00],
+        ['name' => 'Fresh Juice', 'desc' => 'Jus pressé de saison', 'price' => 5.50],
     ]
 ];
 
@@ -55,7 +55,7 @@ foreach ($restaurants as $restaurant) {
     $restaurantId = (string)$restaurant['_id'];
     
     foreach ($menuTemplates as $category => $items) {
-        // Add 2-3 items per category
+        // Ajouter 2-3 articles par catégorie
         $itemsToAdd = array_rand($items, min(3, count($items)));
         if (!is_array($itemsToAdd)) $itemsToAdd = [$itemsToAdd];
         
@@ -67,7 +67,7 @@ foreach ($restaurants as $restaurant) {
                 'name' => $item['name'],
                 'description' => $item['desc'],
                 'category' => $category,
-                'price' => $item['price'] * (rand(8, 15) / 10), // Vary prices
+                'price' => $item['price'] * (rand(8, 15) / 10), // Varier les prix
                 'currency' => 'EUR',
                 'ingredients' => [],
                 'allergens' => [],
@@ -86,53 +86,53 @@ foreach ($restaurants as $restaurant) {
         }
     }
     
-    echo "  ✓ Added menu items for {$restaurant['name']}\n";
+    echo "  ✓ Articles ajoutés pour {$restaurant['name']}\n";
 }
 
-echo "\n✅ Added {$menuCount} menu items!\n\n";
+echo "\n✅ {$menuCount} articles de menu ajoutés !\n\n";
 
-// Add reviews
-echo "⭐ Adding customer reviews...\n";
+// Ajouter des avis
+echo "⭐ Ajout des avis clients...\n";
 
 $reviewTemplates = [
     [
-        'title' => 'Outstanding experience!',
-        'comment' => 'The ambiance was perfect and the food exceeded all expectations. Every dish was beautifully presented and delicious. The staff was attentive without being intrusive. Highly recommend!',
+        'title' => 'Une expérience exceptionnelle !',
+        'comment' => 'L\'ambiance était parfaite et la nourriture a dépassé toutes nos attentes. Chaque plat était joliment présenté et délicieux. Le personnel était attentif sans être intrusif. Hautement recommandé !',
         'rating' => 5
     ],
     [
-        'title' => 'Great atmosphere',
-        'comment' => 'Really enjoyed the unique themed decor. The food was good, though a bit pricey. Service was excellent and the staff was very knowledgeable about the menu.',
+        'title' => 'Super atmosphère',
+        'comment' => 'J\'ai vraiment apprécié la décoration thématique unique. La nourriture était bonne, bien que légèrement chère. Le service était excellent et le personnel très bien renseigné sur le menu.',
         'rating' => 4
     ],
     [
-        'title' => 'Memorable dinner',
-        'comment' => 'Celebrated our anniversary here and it was perfect. The attention to detail in both the food and the environment was remarkable. Will definitely return!',
+        'title' => 'Un dîner mémorable',
+        'comment' => 'Nous avons fêté notre anniversaire ici et c\'était parfait. L\'attention aux détails, aussi bien dans la nourriture que dans l\'environnement, était remarquable. Nous reviendrons sans hésiter !',
         'rating' => 5
     ],
     [
-        'title' => 'Solid choice',
-        'comment' => 'Good food and nice atmosphere. The menu has great variety and everything we tried was well-prepared. A reliable choice for a nice evening out.',
+        'title' => 'Un bon choix',
+        'comment' => 'Bonne cuisine et belle atmosphère. Le menu offre une belle variété et tout ce que nous avons goûté était bien préparé. Une valeur sûre pour une soirée réussie.',
         'rating' => 4
     ],
     [
-        'title' => 'Unique dining experience',
-        'comment' => 'Never experienced anything quite like this! The themed environment really transports you. The food complements the theme beautifully. A must-try!',
+        'title' => 'Une expérience culinaire unique',
+        'comment' => 'Je n\'avais jamais vécu quelque chose de tel ! L\'environnement thématique vous transporte vraiment. La nourriture s\'accorde parfaitement au thème. À ne pas manquer !',
         'rating' => 5
     ],
     [
-        'title' => 'Impressive concept',
-        'comment' => 'The whole concept is brilliant and well-executed. Food quality is consistently high. Prices are fair for what you get. Great for special occasions.',
+        'title' => 'Un concept impressionnant',
+        'comment' => 'Le concept est brillant et bien exécuté. La qualité des plats est constante. Les prix sont raisonnables pour ce qu\'on reçoit. Idéal pour les occasions spéciales.',
         'rating' => 4
     ],
     [
-        'title' => 'Worth the visit',
-        'comment' => 'Came here based on a friend\'s recommendation and wasn\'t disappointed. The dishes are creative and flavorful. The staff made us feel welcome.',
+        'title' => 'Ça vaut le déplacement',
+        'comment' => 'Venu sur la recommandation d\'un ami et je n\'ai pas été déçu. Les plats sont créatifs et savoureux. Le personnel nous a fait nous sentir les bienvenus.',
         'rating' => 4
     ],
     [
-        'title' => 'Exceeded expectations',
-        'comment' => 'From the moment we walked in, we were impressed. The attention to the theme is incredible, and the food is restaurant-quality. Definitely coming back!',
+        'title' => 'Au-delà de nos espérances',
+        'comment' => 'Dès notre arrivée, nous avons été impressionnés. L\'attention portée au thème est incroyable et la nourriture est de qualité restaurant. On reviendra certainement !',
         'rating' => 5
     ]
 ];
@@ -147,7 +147,7 @@ $reviewCount = 0;
 foreach ($restaurants as $restaurant) {
     $restaurantId = (string)$restaurant['_id'];
     
-    // Add 3-5 reviews per restaurant
+    // Ajouter 3-5 avis par restaurant
     $numReviews = rand(3, 5);
     $usedReviews = array_rand($reviewTemplates, $numReviews);
     if (!is_array($usedReviews)) $usedReviews = [$usedReviews];
@@ -156,7 +156,7 @@ foreach ($restaurants as $restaurant) {
         $template = $reviewTemplates[$idx];
         $reviewer = $reviewerNames[array_rand($reviewerNames)];
         
-        // Random date in the last 6 months
+        // Date aléatoire dans les 6 derniers mois
         $daysAgo = rand(1, 180);
         $timestamp = time() - ($daysAgo * 24 * 60 * 60);
         
@@ -175,7 +175,7 @@ foreach ($restaurants as $restaurant) {
             'title' => $template['title'],
             'comment' => $template['comment'],
             'visit_date' => new UTCDateTime($timestamp * 1000),
-            'dining_occasion' => ['Business', 'Romantic', 'Family', 'Friends'][array_rand(['Business', 'Romantic', 'Family', 'Friends'])],
+            'dining_occasion' => ['Affaires', 'Romantique', 'Famille', 'Amis'][array_rand(['Affaires', 'Romantique', 'Famille', 'Amis'])],
             'pros' => [],
             'cons' => [],
             'photos' => [],
@@ -188,14 +188,14 @@ foreach ($restaurants as $restaurant) {
         $reviewCount++;
     }
     
-    echo "  ✓ Added reviews for {$restaurant['name']}\n";
+    echo "  ✓ Avis ajoutés pour {$restaurant['name']}\n";
 }
 
-echo "\n✅ Added {$reviewCount} customer reviews!\n\n";
+echo "\n✅ {$reviewCount} avis clients ajoutés !\n\n";
 
-echo "🎉 Complete! Your BiomeBistro site now has:\n";
-echo "   - {$menuCount} menu items across all restaurants\n";
-echo "   - {$reviewCount} customer reviews\n";
-echo "   - Fully populated restaurant pages\n\n";
-echo "🌐 Refresh your browser to see the changes!\n";
-echo "   Visit: http://localhost:8000\n";
+echo "🎉 Terminé ! Votre site BiomeBistro contient désormais :\n";
+echo "   - {$menuCount} articles de menu dans tous les restaurants\n";
+echo "   - {$reviewCount} avis clients\n";
+echo "   - Des pages restaurant entièrement remplies\n\n";
+echo "🌐 Rafraîchissez votre navigateur pour voir les changements !\n";
+echo "   Visiter : http://localhost:8000\n";

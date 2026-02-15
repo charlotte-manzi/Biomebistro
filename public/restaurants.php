@@ -1,7 +1,6 @@
 <?php
 /**
- * BiomeBistro - Restaurants List Page
- * Browse and filter all restaurants
+ * BiomeBistro - Liste des restaurants avec filtres
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -11,6 +10,12 @@ use BiomeBistro\Models\Biome;
 use BiomeBistro\Utils\Language;
 
 session_start();
+
+// Gérer le changement de langue
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['fr', 'en'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+}
+
 Language::init();
 Language::setLanguage($_SESSION['lang'] ?? 'fr');
 $lang = Language::getCurrentLanguage();
@@ -18,38 +23,41 @@ $lang = Language::getCurrentLanguage();
 $restaurantModel = new Restaurant();
 $biomeModel = new Biome();
 
-// Get all biomes for filter
-$biomes = $biomeModel->getAll();
+// Récupération des paramètres de filtre depuis l'URL
+$selectedBiome = $_GET['biome'] ?? '';
+$minRating = isset($_GET['min_rating']) ? floatval($_GET['min_rating']) : 0;
+$priceRange = $_GET['price_range'] ?? '';
 
-// Build filter parameters
+// Construction du tableau de filtres pour la requête
 $filterParams = [];
-
-if (isset($_GET['biome'])) {
-    $filterParams['biome_id'] = $_GET['biome'];
+if (!empty($selectedBiome)) {
+    $biome = $biomeModel->getByName($selectedBiome);
+    if ($biome) {
+        $filterParams['biome_id'] = (string)$biome['_id'];
+    }
+}
+if ($minRating > 0) {
+    $filterParams['min_rating'] = $minRating;
+}
+if (!empty($priceRange)) {
+    $filterParams['price_range'] = $priceRange;
 }
 
-if (isset($_GET['price_range'])) {
-    $filterParams['price_range'] = $_GET['price_range'];
-}
-
-if (isset($_GET['min_rating'])) {
-    $filterParams['min_rating'] = floatval($_GET['min_rating']);
-}
-
-if (isset($_GET['search'])) {
-    $filterParams['search'] = $_GET['search'];
-}
-
-if (isset($_GET['sort_by'])) {
-    $filterParams['sort_by'] = $_GET['sort_by'];
-}
-
-// Get filtered restaurants
+// Récupération des restaurants selon les filtres appliqués
 $restaurants = empty($filterParams) ? $restaurantModel->getAll() : $restaurantModel->filter($filterParams);
+$allBiomes = $biomeModel->getAll();
 
-// Count results
-$resultCount = count($restaurants);
-
+// Galerie d'images de restaurants pour l'affichage (rotation cyclique)
+$restaurantImages = [
+    'https://images.unsplash.com/photo-1552566626-52f8b828add9?w=600&q=80',
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=80',
+    'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=600&q=80',
+    'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=600&q=80',
+    'https://images.unsplash.com/photo-1578474846511-04ba529f0b88?w=600&q=80',
+    'https://images.unsplash.com/photo-1466978913421-dad2ebd01d17?w=600&q=80',
+    'https://images.unsplash.com/photo-1590846406792-0adc7f938f1d?w=600&q=80',
+    'https://images.unsplash.com/photo-1424847651672-bf20a4b0982b?w=600&q=80',
+];
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $lang; ?>">
@@ -60,304 +68,323 @@ $resultCount = count($restaurants);
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="/css/animations.css">
     <style>
+        /* En-tête de page avec image de fond et overlay sombre */
+        .page-header {
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 4rem 0 3rem;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
+        
+        /* Section des filtres avec effet d'élévation */
         .filters-section {
-            background: var(--bg-light);
-            padding: var(--spacing-lg) 0;
-            border-bottom: 2px solid var(--border-color);
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin: -2rem auto 2rem;
+            max-width: 1200px;
+            position: relative;
+            z-index: 10;
         }
         
-        .filters-container {
-            display: flex;
-            gap: var(--spacing-md);
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .filter-group {
-            flex: 1;
-            min-width: 200px;
+        /* Grille responsive pour les contrôles de filtre */
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            align-items: end;
         }
         
         .filter-group label {
             display: block;
-            margin-bottom: var(--spacing-xs);
             font-weight: 600;
+            margin-bottom: 0.5rem;
             color: var(--text-color);
         }
         
-        .filter-group select,
-        .filter-group input {
+        .filter-group select {
             width: 100%;
-            padding: var(--spacing-sm);
+            padding: 0.75rem;
             border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 0.95rem;
+            border-radius: 8px;
+            font-size: 1rem;
         }
         
-        .filter-buttons {
+        /* Cartes de restaurants avec design moderne et effets hover */
+        .restaurant-card-enhanced {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            height: 100%;
             display: flex;
-            gap: var(--spacing-sm);
-            align-items: flex-end;
+            flex-direction: column;
         }
         
-        .results-header {
-            padding: var(--spacing-lg) 0;
+        .restaurant-card-enhanced:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        /* Conteneur de l'image du restaurant */
+        .restaurant-image-wrapper {
+            position: relative;
+            width: 100%;
+            height: 240px;
+            overflow: hidden;
+        }
+        
+        .restaurant-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        /* Effet de zoom sur l'image au survol */
+        .restaurant-card-enhanced:hover .restaurant-image {
+            transform: scale(1.1);
+        }
+        
+        /* Badge du biome positionné sur l'image */
+        .biome-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255,255,255,0.95);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Contenu textuel de la carte restaurant */
+        .restaurant-content {
+            padding: 1.5rem;
+            flex: 1;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: var(--spacing-md);
+            flex-direction: column;
         }
         
-        .results-count {
-            font-size: 1.1rem;
-            color: var(--text-light);
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: var(--spacing-xl) 0;
-        }
-        
-        .no-results-icon {
-            font-size: 4rem;
-            margin-bottom: var(--spacing-md);
-        }
-        
-        .clear-filters {
-            background: transparent;
-            color: var(--text-light);
-            border: 2px solid var(--border-color);
-        }
-        
-        .clear-filters:hover {
-            border-color: var(--primary-color);
+        .restaurant-name {
+            font-size: 1.5rem;
+            font-weight: bold;
             color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .restaurant-info {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Affichage de la note avec étoiles */
+        .restaurant-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Tags des équipements du restaurant */
+        .restaurant-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-tag {
+            background: var(--bg-light);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.85rem;
+        }
+        
+        /* Boutons d'action en bas de carte */
+        .restaurant-actions {
+            margin-top: auto;
+        }
+        
+        /* Compteur de résultats */
+        .results-count {
+            text-align: center;
+            color: var(--text-light);
+            margin: 2rem 0;
+            font-size: 1.1rem;
         }
     </style>
 </head>
 <body>
-    <!-- Header (same as index.php) -->
+    <!-- En-tête principale avec navigation -->
     <header class="main-header">
         <div class="container">
             <div class="header-content">
-                <div class="logo">
-                    <h1>🌍 BiomeBistro</h1>
-                    <p class="tagline"><?php echo Language::t('welcome_title'); ?></p>
-                </div>
-                
+                <div class="logo"><h1>🌍 BiomeBistro</h1></div>
                 <nav class="main-nav">
                     <a href="index.php"><?php echo Language::t('home'); ?></a>
                     <a href="biomes.php"><?php echo Language::t('biomes'); ?></a>
                     <a href="restaurants.php" class="active"><?php echo Language::t('restaurants'); ?></a>
+                    <a href="my-reservations.php?email=demo@example.com">
+                        <?php echo $lang === 'fr' ? '📅 Réservations' : '📅 Reservations'; ?>
+                    </a>
+                    <a href="my-reviews.php?email=demo@example.com">
+                        <?php echo $lang === 'fr' ? '⭐ Avis' : '⭐ Reviews'; ?>
+                    </a>
+                    <a href="all-menus.php">
+                        <?php echo $lang === 'fr' ? '🍽️ Menus' : '🍽️ Menus'; ?>
+                    </a>
                 </nav>
-                
                 <div class="language-switcher">
-                    <a href="?lang=fr<?php echo isset($_SERVER['QUERY_STRING']) ? '&' . $_SERVER['QUERY_STRING'] : ''; ?>" 
-                       class="lang-btn <?php echo $lang === 'fr' ? 'active' : ''; ?>">
-                        🇫🇷 FR
-                    </a>
-                    <a href="?lang=en<?php echo isset($_SERVER['QUERY_STRING']) ? '&' . $_SERVER['QUERY_STRING'] : ''; ?>" 
-                       class="lang-btn <?php echo $lang === 'en' ? 'active' : ''; ?>">
-                        🇬🇧 EN
-                    </a>
+                    <a href="?lang=fr<?php echo !empty($selectedBiome) ? '&biome='.urlencode($selectedBiome) : ''; ?>" 
+                       class="lang-btn <?php echo $lang === 'fr' ? 'active' : ''; ?>">🇫🇷 FR</a>
+                    <a href="?lang=en<?php echo !empty($selectedBiome) ? '&biome='.urlencode($selectedBiome) : ''; ?>" 
+                       class="lang-btn <?php echo $lang === 'en' ? 'active' : ''; ?>">🇬🇧 EN</a>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Filters Section -->
-    <section class="filters-section">
-        <div class="container">
-            <form method="GET" action="restaurants.php" class="filters-container">
-                <!-- Search -->
+    <!-- Bannière d'en-tête avec titre et slogan -->
+    <section class="page-header">
+        <h1><?php echo $lang === 'fr' ? 'Nos Restaurants' : 'Our Restaurants'; ?></h1>
+        <p><?php echo $lang === 'fr' ? 'Découvrez des expériences culinaires uniques' : 'Discover unique culinary experiences'; ?></p>
+    </section>
+
+    <div class="container">
+        <!-- Formulaire de filtres interactif -->
+        <form method="GET" class="filters-section">
+            <div class="filters-grid">
+                <!-- Filtre par écosystème/biome -->
                 <div class="filter-group">
-                    <label for="search"><?php echo Language::t('search'); ?></label>
-                    <input 
-                        type="text" 
-                        id="search" 
-                        name="search" 
-                        placeholder="<?php echo Language::t('search_placeholder'); ?>"
-                        value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>"
-                    >
-                </div>
-                
-                <!-- Biome Filter -->
-                <div class="filter-group">
-                    <label for="biome"><?php echo Language::t('biome'); ?></label>
-                    <select id="biome" name="biome">
-                        <option value=""><?php echo Language::t('all'); ?></option>
-                        <?php foreach ($biomes as $biome): ?>
-                            <option value="<?php echo $biome['_id']; ?>" 
-                                    <?php echo (isset($_GET['biome']) && $_GET['biome'] == $biome['_id']) ? 'selected' : ''; ?>>
+                    <label><?php echo $lang === 'fr' ? 'Écosystème' : 'Ecosystem'; ?></label>
+                    <select name="biome">
+                        <option value=""><?php echo $lang === 'fr' ? 'Tous les biomes' : 'All biomes'; ?></option>
+                        <?php foreach ($allBiomes as $biome): ?>
+                            <option value="<?php echo htmlspecialchars($biome['name']); ?>" 
+                                    <?php echo $selectedBiome === $biome['name'] ? 'selected' : ''; ?>>
                                 <?php echo $biome['icon']; ?> <?php echo htmlspecialchars($biome['name']); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                
-                <!-- Price Range Filter -->
-                <div class="filter-group">
-                    <label for="price_range"><?php echo Language::t('price_range'); ?></label>
-                    <select id="price_range" name="price_range">
-                        <option value=""><?php echo Language::t('all'); ?></option>
-                        <option value="€" <?php echo (isset($_GET['price_range']) && $_GET['price_range'] == '€') ? 'selected' : ''; ?>>€</option>
-                        <option value="€€" <?php echo (isset($_GET['price_range']) && $_GET['price_range'] == '€€') ? 'selected' : ''; ?>>€€</option>
-                        <option value="€€€" <?php echo (isset($_GET['price_range']) && $_GET['price_range'] == '€€€') ? 'selected' : ''; ?>>€€€</option>
-                        <option value="€€€€" <?php echo (isset($_GET['price_range']) && $_GET['price_range'] == '€€€€') ? 'selected' : ''; ?>>€€€€</option>
-                    </select>
-                </div>
-                
-                <!-- Min Rating Filter -->
-                <div class="filter-group">
-                    <label for="min_rating"><?php echo Language::t('rating'); ?></label>
-                    <select id="min_rating" name="min_rating">
-                        <option value=""><?php echo Language::t('all'); ?></option>
-                        <option value="4.5" <?php echo (isset($_GET['min_rating']) && $_GET['min_rating'] == '4.5') ? 'selected' : ''; ?>>4.5+ ⭐</option>
-                        <option value="4.0" <?php echo (isset($_GET['min_rating']) && $_GET['min_rating'] == '4.0') ? 'selected' : ''; ?>>4.0+ ⭐</option>
-                        <option value="3.5" <?php echo (isset($_GET['min_rating']) && $_GET['min_rating'] == '3.5') ? 'selected' : ''; ?>>3.5+ ⭐</option>
-                        <option value="3.0" <?php echo (isset($_GET['min_rating']) && $_GET['min_rating'] == '3.0') ? 'selected' : ''; ?>>3.0+ ⭐</option>
-                    </select>
-                </div>
-                
-                <!-- Sort By -->
-                <div class="filter-group">
-                    <label for="sort_by"><?php echo Language::t('sort_by'); ?></label>
-                    <select id="sort_by" name="sort_by">
-                        <option value="rating" <?php echo (isset($_GET['sort_by']) && $_GET['sort_by'] == 'rating') ? 'selected' : ''; ?>>
-                            <?php echo Language::t('rating_high_low'); ?>
-                        </option>
-                        <option value="name" <?php echo (isset($_GET['sort_by']) && $_GET['sort_by'] == 'name') ? 'selected' : ''; ?>>
-                            <?php echo Language::t('name'); ?>
-                        </option>
-                        <option value="price_low" <?php echo (isset($_GET['sort_by']) && $_GET['sort_by'] == 'price_low') ? 'selected' : ''; ?>>
-                            <?php echo Language::t('price_low_high'); ?>
-                        </option>
-                        <option value="price_high" <?php echo (isset($_GET['sort_by']) && $_GET['sort_by'] == 'price_high') ? 'selected' : ''; ?>>
-                            <?php echo Language::t('price_high_low'); ?>
-                        </option>
-                    </select>
-                </div>
-                
-                <!-- Filter Buttons -->
-                <div class="filter-buttons">
-                    <button type="submit" class="btn btn-primary">
-                        🔍 <?php echo Language::t('filter'); ?>
-                    </button>
-                    <a href="restaurants.php" class="btn clear-filters">
-                        <?php echo Language::t('all'); ?>
-                    </a>
-                </div>
-            </form>
-        </div>
-    </section>
 
-    <!-- Results Section -->
-    <section class="top-rated-section">
-        <div class="container">
-            <div class="results-header">
-                <div class="results-count">
-                    <?php echo $resultCount; ?> <?php echo Language::t('restaurants_count'); ?>
-                    <?php if (!empty($filterParams)): ?>
-                        <?php echo $lang === 'fr' ? 'trouvé(s)' : 'found'; ?>
-                    <?php endif; ?>
+                <!-- Filtre par note minimale -->
+                <div class="filter-group">
+                    <label><?php echo $lang === 'fr' ? 'Note minimum' : 'Minimum rating'; ?></label>
+                    <select name="min_rating">
+                        <option value="0"><?php echo $lang === 'fr' ? 'Toutes' : 'All'; ?></option>
+                        <option value="4" <?php echo $minRating == 4 ? 'selected' : ''; ?>>4★ <?php echo $lang === 'fr' ? 'et plus' : 'and above'; ?></option>
+                        <option value="4.5" <?php echo $minRating == 4.5 ? 'selected' : ''; ?>>4.5★ <?php echo $lang === 'fr' ? 'et plus' : 'and above'; ?></option>
+                    </select>
                 </div>
+
+                <!-- Filtre par gamme de prix -->
+                <div class="filter-group">
+                    <label><?php echo $lang === 'fr' ? 'Gamme de prix' : 'Price range'; ?></label>
+                    <select name="price_range">
+                        <option value=""><?php echo $lang === 'fr' ? 'Toutes' : 'All'; ?></option>
+                        <option value="€€" <?php echo $priceRange === '€€' ? 'selected' : ''; ?>>€€</option>
+                        <option value="€€€" <?php echo $priceRange === '€€€' ? 'selected' : ''; ?>>€€€</option>
+                        <option value="€€€€" <?php echo $priceRange === '€€€€' ? 'selected' : ''; ?>>€€€€</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <?php echo $lang === 'fr' ? '🔍 Rechercher' : '🔍 Search'; ?>
+                </button>
             </div>
-            
-            <?php if (empty($restaurants)): ?>
-                <div class="no-results">
-                    <div class="no-results-icon">🔍</div>
-                    <h2><?php echo $lang === 'fr' ? 'Aucun restaurant trouvé' : 'No restaurants found'; ?></h2>
-                    <p><?php echo $lang === 'fr' ? 'Essayez de modifier vos filtres' : 'Try adjusting your filters'; ?></p>
-                    <a href="restaurants.php" class="btn btn-primary"><?php echo Language::t('view_more'); ?></a>
-                </div>
-            <?php else: ?>
-                <div class="restaurant-grid">
-                    <?php foreach ($restaurants as $restaurant): 
-                        $biome = $biomeModel->getById((string)$restaurant['biome_id']);
-                    ?>
-                        <div class="restaurant-card">
-                            <div class="restaurant-badge" style="background: <?php echo $biome['color_theme'] ?? '#27AE60'; ?>">
-                                <?php echo $biome['icon'] ?? '🌍'; ?> <?php echo htmlspecialchars($biome['name'] ?? ''); ?>
+        </form>
+
+        <!-- Affichage du nombre de résultats trouvés -->
+        <p class="results-count">
+            <?php echo count($restaurants); ?> <?php echo $lang === 'fr' ? 'restaurant(s) trouvé(s)' : 'restaurant(s) found'; ?>
+        </p>
+
+        <!-- Grille des cartes de restaurants -->
+        <div class="restaurant-grid">
+            <?php foreach ($restaurants as $index => $restaurant): 
+                $biome = $biomeModel->getById((string)$restaurant['biome_id']);
+            ?>
+                <div class="restaurant-card-enhanced">
+                    <!-- Section image avec badge biome -->
+                    <div class="restaurant-image-wrapper">
+                        <img src="<?php echo $restaurantImages[$index % count($restaurantImages)]; ?>" 
+                             alt="<?php echo htmlspecialchars($restaurant['name']); ?>" 
+                             class="restaurant-image">
+                        <?php if ($biome): ?>
+                            <div class="biome-badge" style="color: <?php echo $biome['color_theme']; ?>">
+                                <?php echo $biome['icon']; ?> <?php echo htmlspecialchars($biome['name']); ?>
                             </div>
-                            
-                            <h3 class="restaurant-name">
-                                <a href="restaurant-detail.php?id=<?php echo $restaurant['_id']; ?>">
-                                    <?php echo htmlspecialchars($restaurant['name']); ?>
-                                </a>
-                            </h3>
-                            
-                            <p class="restaurant-description">
-                                <?php echo htmlspecialchars(substr($restaurant['description'], 0, 120)); ?>...
-                            </p>
-                            
-                            <div class="restaurant-info">
-                                <div class="rating">
-                                    <span class="stars">
-                                        <?php 
-                                        $rating = $restaurant['average_rating'];
-                                        for ($i = 1; $i <= 5; $i++) {
-                                            echo $i <= $rating ? '⭐' : '☆';
-                                        }
-                                        ?>
-                                    </span>
-                                    <span class="rating-number"><?php echo number_format($rating, 1); ?></span>
-                                    <span class="review-count">(<?php echo $restaurant['total_reviews']; ?>)</span>
-                                </div>
-                                
-                                <div class="price-range">
-                                    <?php echo htmlspecialchars($restaurant['price_range']); ?>
-                                </div>
-                            </div>
-                            
-                            <div class="restaurant-location">
-                                📍 <?php echo htmlspecialchars($restaurant['location']['district']); ?>
-                            </div>
-                            
-                            <div class="restaurant-cuisine">
-                                🍽️ <?php echo htmlspecialchars($restaurant['cuisine_style']); ?>
-                            </div>
-                            
-                            <div class="restaurant-actions">
-                                <a href="restaurant-detail.php?id=<?php echo $restaurant['_id']; ?>" class="btn btn-small btn-primary">
-                                    <?php echo Language::t('view_details'); ?>
-                                </a>
-                                <a href="make-reservation.php?restaurant=<?php echo $restaurant['_id']; ?>" class="btn btn-small btn-secondary">
-                                    <?php echo Language::t('book_table'); ?>
-                                </a>
-                            </div>
+                        <?php endif; ?>
+                    </div>
+                    
+                    <!-- Section contenu texte -->
+                    <div class="restaurant-content">
+                        <h3 class="restaurant-name"><?php echo htmlspecialchars($restaurant['name']); ?></h3>
+                        
+                        <!-- Informations de base du restaurant -->
+                        <p class="restaurant-info">
+                            📍 <?php echo htmlspecialchars($restaurant['location']['district']); ?><br>
+                            🍽️ <?php echo htmlspecialchars($restaurant['cuisine_style']); ?> • <?php echo $restaurant['price_range']; ?>
+                        </p>
+                        
+                        <!-- Affichage de la note avec étoiles -->
+                        <div class="restaurant-rating">
+                            <span style="color: gold; font-size: 1.2rem;">
+                                <?php for ($i = 1; $i <= 5; $i++) echo $i <= floor($restaurant['average_rating']) ? '★' : '☆'; ?>
+                            </span>
+                            <span><strong><?php echo number_format($restaurant['average_rating'], 1); ?></strong></span>
+                            <span style="color: var(--text-light);">(<?php echo $restaurant['total_reviews']; ?>)</span>
                         </div>
-                    <?php endforeach; ?>
+                        
+                        <!-- Tags des équipements (3 premiers) -->
+                        <div class="restaurant-features">
+                            <?php 
+                            $features = $restaurant['features'] ?? [];
+                            if ($features instanceof MongoDB\Model\BSONArray) {
+                                $features = $features->getArrayCopy();
+                            }
+                            foreach (array_slice($features, 0, 3) as $feature): 
+                            ?>
+                                <span class="feature-tag"><?php echo htmlspecialchars($feature); ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                        
+                        <!-- Bouton d'action vers la page de détail -->
+                        <div class="restaurant-actions">
+                            <a href="restaurant-detail.php?id=<?php echo $restaurant['_id']; ?>" class="btn btn-primary" style="width: 100%;">
+                                <?php echo $lang === 'fr' ? 'Voir les détails' : 'View details'; ?>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            <?php endif; ?>
+            <?php endforeach; ?>
         </div>
-    </section>
+    </div>
 
-    <!-- Footer -->
-    <footer class="main-footer">
+    <!-- Pied de page -->
+    <footer class="main-footer" style="margin-top: 4rem;">
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>BiomeBistro</h3>
-                    <p><?php echo Language::t('welcome_subtitle'); ?></p>
-                </div>
-                
-                <div class="footer-section">
-                    <h4><?php echo Language::t('about_us'); ?></h4>
-                    <ul>
-                        <li><a href="#"><?php echo Language::t('contact'); ?></a></li>
-                        <li><a href="#"><?php echo Language::t('careers'); ?></a></li>
-                        <li><a href="#"><?php echo Language::t('terms'); ?></a></li>
-                    </ul>
-                </div>
-            </div>
-            
             <div class="footer-bottom">
                 <p><?php echo Language::t('copyright'); ?></p>
             </div>
         </div>
     </footer>
-
+    
     <script src="/js/main.js"></script>
     <script src="/js/animations.js"></script>
 </body>

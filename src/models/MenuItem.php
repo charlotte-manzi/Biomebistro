@@ -1,7 +1,7 @@
 <?php
 /**
- * MenuItem Model
- * Handles menu items for restaurants
+ * Modèle MenuItem
+ * Gère les éléments de menu des restaurants
  */
 
 namespace BiomeBistro\Models;
@@ -18,19 +18,19 @@ class MenuItem {
     }
     
     /**
-     * Get all menu items
+     * Récupère tous les éléments de menu
      * 
-     * @return array Array of menu item documents
+     * @return array Tableau de documents d'éléments de menu
      */
     public function getAll(): array {
         return $this->collection->find()->toArray();
     }
     
     /**
-     * Get menu item by ID
+     * Récupère un élément de menu par son ID
      * 
-     * @param string $id Menu item ID
-     * @return array|null Menu item document or null
+     * @param string $id ID de l'élément de menu
+     * @return array|null Document de l'élément de menu ou null
      */
     public function getById(string $id): ?array {
         try {
@@ -42,17 +42,17 @@ class MenuItem {
     }
     
     /**
-     * Get menu items by restaurant
+     * Récupère les éléments de menu par restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param array $filters Optional filters (category, available, etc.)
-     * @return array Array of menu items
+     * @param string $restaurantId ID du restaurant
+     * @param array $filters Filtres optionnels (category, available, etc.)
+     * @return array Tableau d'éléments de menu
      */
     public function getByRestaurant(string $restaurantId, array $filters = []): array {
         try {
             $query = ['restaurant_id' => new ObjectId($restaurantId)];
             
-            // Add additional filters
+            // Ajouter des filtres supplémentaires
             if (isset($filters['category'])) {
                 $query['category'] = $filters['category'];
             }
@@ -65,54 +65,54 @@ class MenuItem {
                 $query['is_signature_dish'] = $filters['is_signature_dish'];
             }
             
-            // Sort by category, then by popularity
+            // Trier par catégorie, puis par rang de popularité
             return $this->collection->find(
                 $query,
                 ['sort' => ['category' => 1, 'popularity_rank' => 1]]
             )->toArray();
         } catch (\Exception $e) {
-            error_log("Error getting menu items: " . $e->getMessage());
+            error_log("Erreur lors de la récupération des éléments de menu : " . $e->getMessage());
             return [];
         }
     }
     
     /**
-     * Get menu items by category for a restaurant
+     * Récupère les éléments de menu par catégorie pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param string $category Category name
-     * @return array Array of menu items
+     * @param string $restaurantId ID du restaurant
+     * @param string $category Nom de la catégorie
+     * @return array Tableau d'éléments de menu
      */
     public function getByCategory(string $restaurantId, string $category): array {
         return $this->getByRestaurant($restaurantId, ['category' => $category]);
     }
     
     /**
-     * Get signature dishes for a restaurant
+     * Récupère les plats signature d'un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return array Array of signature dishes
+     * @param string $restaurantId ID du restaurant
+     * @return array Tableau de plats signature
      */
     public function getSignatureDishes(string $restaurantId): array {
         return $this->getByRestaurant($restaurantId, ['is_signature_dish' => true]);
     }
     
     /**
-     * Get available menu items for a restaurant
+     * Récupère les éléments de menu disponibles pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return array Array of available menu items
+     * @param string $restaurantId ID du restaurant
+     * @return array Tableau d'éléments de menu disponibles
      */
     public function getAvailable(string $restaurantId): array {
         return $this->getByRestaurant($restaurantId, ['is_available' => true]);
     }
     
     /**
-     * Search menu items
+     * Recherche des éléments de menu
      * 
-     * @param string $query Search query
-     * @param string|null $restaurantId Optional restaurant filter
-     * @return array Array of matching menu items
+     * @param string $query Requête de recherche
+     * @param string|null $restaurantId Filtre restaurant optionnel
+     * @return array Tableau d'éléments de menu correspondants
      */
     public function search(string $query, ?string $restaurantId = null): array {
         $filter = [
@@ -126,7 +126,7 @@ class MenuItem {
             try {
                 $filter['restaurant_id'] = new ObjectId($restaurantId);
             } catch (\Exception $e) {
-                // Invalid ObjectId, ignore filter
+                // ObjectId invalide, ignorer le filtre
             }
         }
         
@@ -134,21 +134,21 @@ class MenuItem {
     }
     
     /**
-     * Create a new menu item
+     * Crée un nouvel élément de menu
      * 
-     * @param array $data Menu item data
-     * @return string|null Inserted ID or null on failure
+     * @param array $data Données de l'élément de menu
+     * @return string|null ID inséré ou null en cas d'échec
      */
     public function create(array $data): ?string {
         try {
-            // Set default values
+            // Définir les valeurs par défaut
             $data['is_available'] = $data['is_available'] ?? true;
             $data['is_signature_dish'] = $data['is_signature_dish'] ?? false;
             $data['is_seasonal'] = $data['is_seasonal'] ?? false;
             $data['popularity_rank'] = $data['popularity_rank'] ?? 999;
             $data['created_at'] = new UTCDateTime();
             
-            // Convert restaurant_id to ObjectId if it's a string
+            // Convertir restaurant_id en ObjectId s'il s'agit d'une chaîne
             if (isset($data['restaurant_id']) && is_string($data['restaurant_id'])) {
                 $data['restaurant_id'] = new ObjectId($data['restaurant_id']);
             }
@@ -156,21 +156,21 @@ class MenuItem {
             $result = $this->collection->insertOne($data);
             return (string)$result->getInsertedId();
         } catch (\Exception $e) {
-            error_log("Error creating menu item: " . $e->getMessage());
+            error_log("Erreur lors de la création de l'élément de menu : " . $e->getMessage());
             return null;
         }
     }
     
     /**
-     * Update a menu item
+     * Met à jour un élément de menu
      * 
-     * @param string $id Menu item ID
-     * @param array $data Updated data
-     * @return bool Success status
+     * @param string $id ID de l'élément de menu
+     * @param array $data Données mises à jour
+     * @return bool Statut de succès
      */
     public function update(string $id, array $data): bool {
         try {
-            // Convert restaurant_id to ObjectId if present and is string
+            // Convertir restaurant_id en ObjectId s'il est présent et est une chaîne
             if (isset($data['restaurant_id']) && is_string($data['restaurant_id'])) {
                 $data['restaurant_id'] = new ObjectId($data['restaurant_id']);
             }
@@ -181,43 +181,43 @@ class MenuItem {
             );
             return $result->getModifiedCount() > 0 || $result->getMatchedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error updating menu item: " . $e->getMessage());
+            error_log("Erreur lors de la mise à jour de l'élément de menu : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Delete a menu item
+     * Supprime un élément de menu
      * 
-     * @param string $id Menu item ID
-     * @return bool Success status
+     * @param string $id ID de l'élément de menu
+     * @return bool Statut de succès
      */
     public function delete(string $id): bool {
         try {
             $result = $this->collection->deleteOne(['_id' => new ObjectId($id)]);
             return $result->getDeletedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error deleting menu item: " . $e->getMessage());
+            error_log("Erreur lors de la suppression de l'élément de menu : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Toggle availability of a menu item
+     * Bascule la disponibilité d'un élément de menu
      * 
-     * @param string $id Menu item ID
-     * @param bool $available Availability status
-     * @return bool Success status
+     * @param string $id ID de l'élément de menu
+     * @param bool $available Statut de disponibilité
+     * @return bool Statut de succès
      */
     public function setAvailability(string $id, bool $available): bool {
         return $this->update($id, ['is_available' => $available]);
     }
     
     /**
-     * Get menu categories for a restaurant
+     * Récupère les catégories de menu pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return array Array of unique categories
+     * @param string $restaurantId ID du restaurant
+     * @return array Tableau de catégories uniques
      */
     public function getCategories(string $restaurantId): array {
         try {
@@ -231,10 +231,10 @@ class MenuItem {
     }
     
     /**
-     * Count menu items for a restaurant
+     * Compte les éléments de menu pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return int Count
+     * @param string $restaurantId ID du restaurant
+     * @return int Compteur
      */
     public function countByRestaurant(string $restaurantId): int {
         try {
@@ -247,11 +247,11 @@ class MenuItem {
     }
     
     /**
-     * Get items by allergen (find items that DON'T contain specific allergen)
+     * Récupère les éléments par allergène (trouve les éléments qui NE contiennent PAS un allergène spécifique)
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param string $allergen Allergen to exclude
-     * @return array Array of safe menu items
+     * @param string $restaurantId ID du restaurant
+     * @param string $allergen Allergène à exclure
+     * @return array Tableau d'éléments de menu sûrs
      */
     public function getWithoutAllergen(string $restaurantId, string $allergen): array {
         try {
@@ -265,12 +265,12 @@ class MenuItem {
     }
     
     /**
-     * Get items within a price range
+     * Récupère les éléments dans une fourchette de prix
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param float $minPrice Minimum price
-     * @param float $maxPrice Maximum price
-     * @return array Array of menu items
+     * @param string $restaurantId ID du restaurant
+     * @param float $minPrice Prix minimum
+     * @param float $maxPrice Prix maximum
+     * @return array Tableau d'éléments de menu
      */
     public function getByPriceRange(string $restaurantId, float $minPrice, float $maxPrice): array {
         try {

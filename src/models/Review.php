@@ -1,7 +1,7 @@
 <?php
 /**
- * Review Model
- * Handles customer reviews for restaurants
+ * Modèle Review
+ * Gère les avis clients pour les restaurants
  */
 
 namespace BiomeBistro\Models;
@@ -18,10 +18,10 @@ class Review {
     }
     
     /**
-     * Get all reviews
+     * Récupère tous les avis
      * 
-     * @param int $limit Optional limit
-     * @return array Array of review documents
+     * @param int $limit Limite optionnelle
+     * @return array Tableau de documents d'avis
      */
     public function getAll(int $limit = 0): array {
         $options = ['sort' => ['created_at' => -1]];
@@ -34,10 +34,10 @@ class Review {
     }
     
     /**
-     * Get review by ID
+     * Récupère un avis par son ID
      * 
-     * @param string $id Review ID
-     * @return array|null Review document or null
+     * @param string $id ID de l'avis
+     * @return array|null Document d'avis ou null
      */
     public function getById(string $id): ?array {
         try {
@@ -49,18 +49,18 @@ class Review {
     }
     
     /**
-     * Get reviews by restaurant
+     * Récupère les avis par restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param array $filters Optional filters
-     * @param int $limit Optional limit
-     * @return array Array of reviews
+     * @param string $restaurantId ID du restaurant
+     * @param array $filters Filtres optionnels
+     * @param int $limit Limite optionnelle
+     * @return array Tableau d'avis
      */
     public function getByRestaurant(string $restaurantId, array $filters = [], int $limit = 0): array {
         try {
             $query = ['restaurant_id' => new ObjectId($restaurantId)];
             
-            // Apply additional filters
+            // Appliquer des filtres supplémentaires
             if (isset($filters['min_rating'])) {
                 $query['rating'] = ['$gte' => (float)$filters['min_rating']];
             }
@@ -77,16 +77,31 @@ class Review {
             
             return $this->collection->find($query, $options)->toArray();
         } catch (\Exception $e) {
-            error_log("Error getting reviews: " . $e->getMessage());
+            error_log("Erreur lors de la récupération des avis : " . $e->getMessage());
             return [];
         }
     }
     
     /**
-     * Get recent reviews across all restaurants
+     * Récupère tous les avis d'un utilisateur par email
      * 
-     * @param int $limit Number of reviews to return
-     * @return array Array of recent reviews
+     * @param string $email Email de l'utilisateur
+     * @return array Tableau d'avis de l'utilisateur
+     */
+    public function getByEmail(string $email): array
+    {
+        return $this->collection->find([
+            'reviewer_email' => $email
+        ], [
+            'sort' => ['created_at' => -1]
+        ])->toArray();
+    }
+    
+    /**
+     * Récupère les avis récents sur tous les restaurants
+     * 
+     * @param int $limit Nombre d'avis à retourner
+     * @return array Tableau d'avis récents
      */
     public function getRecent(int $limit = 10): array {
         return $this->collection->find(
@@ -96,11 +111,11 @@ class Review {
     }
     
     /**
-     * Get top reviews (highest rated with most helpful votes)
+     * Récupère les meilleurs avis (les mieux notés avec le plus de votes utiles)
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param int $limit Number of reviews to return
-     * @return array Array of top reviews
+     * @param string $restaurantId ID du restaurant
+     * @param int $limit Nombre d'avis à retourner
+     * @return array Tableau des meilleurs avis
      */
     public function getTopReviews(string $restaurantId, int $limit = 5): array {
         try {
@@ -117,24 +132,24 @@ class Review {
     }
     
     /**
-     * Create a new review
+     * Crée un nouvel avis
      * 
-     * @param array $data Review data
-     * @return string|null Inserted ID or null on failure
+     * @param array $data Données de l'avis
+     * @return string|null ID inséré ou null en cas d'échec
      */
     public function create(array $data): ?string {
         try {
-            // Set default values
+            // Définir les valeurs par défaut
             $data['helpful_votes'] = $data['helpful_votes'] ?? 0;
             $data['verified_visit'] = $data['verified_visit'] ?? false;
             $data['created_at'] = new UTCDateTime();
             
-            // Convert restaurant_id to ObjectId if it's a string
+            // Convertir restaurant_id en ObjectId s'il s'agit d'une chaîne
             if (isset($data['restaurant_id']) && is_string($data['restaurant_id'])) {
                 $data['restaurant_id'] = new ObjectId($data['restaurant_id']);
             }
             
-            // Ensure ratings_breakdown has all required fields
+            // S'assurer que ratings_breakdown contient tous les champs requis
             if (!isset($data['ratings_breakdown'])) {
                 $rating = $data['rating'] ?? 5;
                 $data['ratings_breakdown'] = [
@@ -149,7 +164,7 @@ class Review {
             $result = $this->collection->insertOne($data);
             $insertedId = (string)$result->getInsertedId();
             
-            // Update restaurant's average rating
+            // Mettre à jour la note moyenne du restaurant
             if (isset($data['restaurant_id'])) {
                 $restaurantModel = new Restaurant();
                 $restaurantModel->updateRating((string)$data['restaurant_id']);
@@ -157,24 +172,24 @@ class Review {
             
             return $insertedId;
         } catch (\Exception $e) {
-            error_log("Error creating review: " . $e->getMessage());
+            error_log("Erreur lors de la création de l'avis : " . $e->getMessage());
             return null;
         }
     }
     
     /**
-     * Update a review
+     * Met à jour un avis
      * 
-     * @param string $id Review ID
-     * @param array $data Updated data
-     * @return bool Success status
+     * @param string $id ID de l'avis
+     * @param array $data Données mises à jour
+     * @return bool Statut de succès
      */
     public function update(string $id, array $data): bool {
         try {
-            // Get the review to know which restaurant to update
+            // Récupérer l'avis pour savoir quel restaurant mettre à jour
             $review = $this->getById($id);
             
-            // Convert restaurant_id to ObjectId if present and is string
+            // Convertir restaurant_id en ObjectId s'il est présent et est une chaîne
             if (isset($data['restaurant_id']) && is_string($data['restaurant_id'])) {
                 $data['restaurant_id'] = new ObjectId($data['restaurant_id']);
             }
@@ -186,7 +201,7 @@ class Review {
             
             $success = $result->getModifiedCount() > 0 || $result->getMatchedCount() > 0;
             
-            // Update restaurant rating if review was modified
+            // Mettre à jour la note du restaurant si l'avis a été modifié
             if ($success && $review && isset($review['restaurant_id'])) {
                 $restaurantModel = new Restaurant();
                 $restaurantModel->updateRating((string)$review['restaurant_id']);
@@ -194,26 +209,26 @@ class Review {
             
             return $success;
         } catch (\Exception $e) {
-            error_log("Error updating review: " . $e->getMessage());
+            error_log("Erreur lors de la mise à jour de l'avis : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Delete a review
+     * Supprime un avis
      * 
-     * @param string $id Review ID
-     * @return bool Success status
+     * @param string $id ID de l'avis
+     * @return bool Statut de succès
      */
     public function delete(string $id): bool {
         try {
-            // Get the review to know which restaurant to update
+            // Récupérer l'avis pour savoir quel restaurant mettre à jour
             $review = $this->getById($id);
             
             $result = $this->collection->deleteOne(['_id' => new ObjectId($id)]);
             $success = $result->getDeletedCount() > 0;
             
-            // Update restaurant rating after deletion
+            // Mettre à jour la note du restaurant après suppression
             if ($success && $review && isset($review['restaurant_id'])) {
                 $restaurantModel = new Restaurant();
                 $restaurantModel->updateRating((string)$review['restaurant_id']);
@@ -221,16 +236,16 @@ class Review {
             
             return $success;
         } catch (\Exception $e) {
-            error_log("Error deleting review: " . $e->getMessage());
+            error_log("Erreur lors de la suppression de l'avis : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Add a helpful vote to a review
+     * Ajoute un vote "utile" à un avis
      * 
-     * @param string $id Review ID
-     * @return bool Success status
+     * @param string $id ID de l'avis
+     * @return bool Statut de succès
      */
     public function addHelpfulVote(string $id): bool {
         try {
@@ -240,17 +255,17 @@ class Review {
             );
             return $result->getModifiedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error adding helpful vote: " . $e->getMessage());
+            error_log("Erreur lors de l'ajout du vote utile : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Add restaurant response to a review
+     * Ajoute une réponse du restaurant à un avis
      * 
-     * @param string $id Review ID
-     * @param string $reply Response text
-     * @return bool Success status
+     * @param string $id ID de l'avis
+     * @param string $reply Texte de la réponse
+     * @return bool Statut de succès
      */
     public function addRestaurantResponse(string $id, string $reply): bool {
         try {
@@ -266,16 +281,16 @@ class Review {
             );
             return $result->getModifiedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error adding restaurant response: " . $e->getMessage());
+            error_log("Erreur lors de l'ajout de la réponse du restaurant : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Calculate average rating for a restaurant
+     * Calcule la note moyenne pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return float Average rating
+     * @param string $restaurantId ID du restaurant
+     * @return float Note moyenne
      */
     public function calculateAverageRating(string $restaurantId): float {
         $reviews = $this->getByRestaurant($restaurantId);
@@ -293,10 +308,10 @@ class Review {
     }
     
     /**
-     * Get rating breakdown statistics for a restaurant
+     * Récupère les statistiques détaillées des notes pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return array Rating breakdown with averages
+     * @param string $restaurantId ID du restaurant
+     * @return array Détail des notes avec moyennes
      */
     public function getRatingBreakdown(string $restaurantId): array {
         $reviews = $this->getByRestaurant($restaurantId);
@@ -336,10 +351,10 @@ class Review {
     }
     
     /**
-     * Count reviews for a restaurant
+     * Compte les avis pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @return int Count
+     * @param string $restaurantId ID du restaurant
+     * @return int Compteur
      */
     public function countByRestaurant(string $restaurantId): int {
         try {
@@ -352,12 +367,12 @@ class Review {
     }
     
     /**
-     * Get reviews by rating range
+     * Récupère les avis par plage de notes
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param int $minRating Minimum rating
-     * @param int $maxRating Maximum rating
-     * @return array Array of reviews
+     * @param string $restaurantId ID du restaurant
+     * @param int $minRating Note minimum
+     * @param int $maxRating Note maximum
+     * @return array Tableau d'avis
      */
     public function getByRatingRange(string $restaurantId, int $minRating, int $maxRating): array {
         try {

@@ -1,7 +1,7 @@
 <?php
 /**
- * Reservation Model
- * Handles table reservations/bookings
+ * Modèle Reservation
+ * Gère les réservations de tables
  */
 
 namespace BiomeBistro\Models;
@@ -19,11 +19,11 @@ class Reservation {
     }
     
     /**
-     * Get all reservations
+     * Récupère toutes les réservations
      * 
-     * @param array $filters Optional filters
-     * @param int $limit Optional limit
-     * @return array Array of reservation documents
+     * @param array $filters Filtres optionnels
+     * @param int $limit Limite optionnelle
+     * @return array Tableau de documents de réservations
      */
     public function getAll(array $filters = [], int $limit = 0): array {
         $options = ['sort' => ['reservation_date' => 1, 'reservation_time' => 1]];
@@ -36,10 +36,10 @@ class Reservation {
     }
     
     /**
-     * Get reservation by ID
+     * Récupère une réservation par son ID
      * 
-     * @param string $id Reservation ID
-     * @return array|null Reservation document or null
+     * @param string $id ID de la réservation
+     * @return array|null Document de réservation ou null
      */
     public function getById(string $id): ?array {
         try {
@@ -51,10 +51,10 @@ class Reservation {
     }
     
     /**
-     * Get reservation by confirmation code
+     * Récupère une réservation par code de confirmation
      * 
-     * @param string $code Confirmation code
-     * @return array|null Reservation document or null
+     * @param string $code Code de confirmation
+     * @return array|null Document de réservation ou null
      */
     public function getByConfirmationCode(string $code): ?array {
         $result = $this->collection->findOne(['confirmation_code' => $code]);
@@ -62,22 +62,22 @@ class Reservation {
     }
     
     /**
-     * Get reservations by restaurant
+     * Récupère les réservations par restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param array $filters Optional filters (date, status, etc.)
-     * @return array Array of reservations
+     * @param string $restaurantId ID du restaurant
+     * @param array $filters Filtres optionnels (date, status, etc.)
+     * @return array Tableau de réservations
      */
     public function getByRestaurant(string $restaurantId, array $filters = []): array {
         try {
             $query = ['restaurant_id' => new ObjectId($restaurantId)];
             
-            // Add date filter
+            // Ajouter un filtre de date
             if (isset($filters['date'])) {
                 $query['reservation_date'] = $this->convertToUTCDateTime($filters['date']);
             }
             
-            // Add status filter
+            // Ajouter un filtre de statut
             if (isset($filters['status'])) {
                 $query['status'] = $filters['status'];
             }
@@ -87,30 +87,30 @@ class Reservation {
                 ['sort' => ['reservation_date' => 1, 'reservation_time' => 1]]
             )->toArray();
         } catch (\Exception $e) {
-            error_log("Error getting reservations: " . $e->getMessage());
+            error_log("Erreur lors de la récupération des réservations : " . $e->getMessage());
             return [];
         }
     }
     
     /**
-     * Get reservations by customer email
+     * Récupère les réservations par email du client
      * 
-     * @param string $email Customer email
-     * @return array Array of reservations
+     * @param string $email Email du client
+     * @return array Tableau de réservations
      */
     public function getByCustomerEmail(string $email): array {
         return $this->collection->find(
             ['customer_info.email' => $email],
-            ['sort' => ['reservation_date' => -1]]
+            ['sort' => ['reservation_date' => -1, 'reservation_time' => -1]]
         )->toArray();
     }
     
     /**
-     * Get upcoming reservations for a restaurant
+     * Récupère les réservations à venir pour un restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param int $limit Optional limit
-     * @return array Array of upcoming reservations
+     * @param string $restaurantId ID du restaurant
+     * @param int $limit Limite optionnelle
+     * @return array Tableau de réservations à venir
      */
     public function getUpcoming(string $restaurantId, int $limit = 0): array {
         try {
@@ -138,54 +138,54 @@ class Reservation {
     }
     
     /**
-     * Create a new reservation
+     * Crée une nouvelle réservation
      * 
-     * @param array $data Reservation data
-     * @return string|null Inserted ID or null on failure
+     * @param array $data Données de la réservation
+     * @return string|null ID inséré ou null en cas d'échec
      */
     public function create(array $data): ?string {
         try {
-            // Set default values
+            // Définir les valeurs par défaut
             $data['status'] = $data['status'] ?? 'confirmed';
             $data['reminder_sent'] = false;
             $data['created_at'] = new UTCDateTime();
             
-            // Convert restaurant_id to ObjectId if it's a string
+            // Convertir restaurant_id en ObjectId s'il s'agit d'une chaîne
             if (isset($data['restaurant_id']) && is_string($data['restaurant_id'])) {
                 $data['restaurant_id'] = new ObjectId($data['restaurant_id']);
             }
             
-            // Convert reservation_date to UTCDateTime if it's a string
+            // Convertir reservation_date en UTCDateTime s'il s'agit d'une chaîne
             if (isset($data['reservation_date']) && is_string($data['reservation_date'])) {
                 $data['reservation_date'] = $this->convertToUTCDateTime($data['reservation_date']);
             }
             
-            // Generate confirmation code
+            // Générer un code de confirmation
             $data['confirmation_code'] = $this->generateConfirmationCode();
             
             $result = $this->collection->insertOne($data);
             return (string)$result->getInsertedId();
         } catch (\Exception $e) {
-            error_log("Error creating reservation: " . $e->getMessage());
+            error_log("Erreur lors de la création de la réservation : " . $e->getMessage());
             return null;
         }
     }
     
     /**
-     * Update a reservation
+     * Met à jour une réservation
      * 
-     * @param string $id Reservation ID
-     * @param array $data Updated data
-     * @return bool Success status
+     * @param string $id ID de la réservation
+     * @param array $data Données mises à jour
+     * @return bool Statut de succès
      */
     public function update(string $id, array $data): bool {
         try {
-            // Convert restaurant_id to ObjectId if present and is string
+            // Convertir restaurant_id en ObjectId s'il est présent et est une chaîne
             if (isset($data['restaurant_id']) && is_string($data['restaurant_id'])) {
                 $data['restaurant_id'] = new ObjectId($data['restaurant_id']);
             }
             
-            // Convert reservation_date to UTCDateTime if present and is string
+            // Convertir reservation_date en UTCDateTime s'il est présent et est une chaîne
             if (isset($data['reservation_date']) && is_string($data['reservation_date'])) {
                 $data['reservation_date'] = $this->convertToUTCDateTime($data['reservation_date']);
             }
@@ -196,17 +196,17 @@ class Reservation {
             );
             return $result->getModifiedCount() > 0 || $result->getMatchedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error updating reservation: " . $e->getMessage());
+            error_log("Erreur lors de la mise à jour de la réservation : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Cancel a reservation
+     * Annule une réservation
      * 
-     * @param string $id Reservation ID
-     * @param string $reason Cancellation reason
-     * @return bool Success status
+     * @param string $id ID de la réservation
+     * @param string $reason Raison de l'annulation
+     * @return bool Statut de succès
      */
     public function cancel(string $id, string $reason = ''): bool {
         return $this->update($id, [
@@ -217,32 +217,32 @@ class Reservation {
     }
     
     /**
-     * Delete a reservation
+     * Supprime une réservation
      * 
-     * @param string $id Reservation ID
-     * @return bool Success status
+     * @param string $id ID de la réservation
+     * @return bool Statut de succès
      */
     public function delete(string $id): bool {
         try {
             $result = $this->collection->deleteOne(['_id' => new ObjectId($id)]);
             return $result->getDeletedCount() > 0;
         } catch (\Exception $e) {
-            error_log("Error deleting reservation: " . $e->getMessage());
+            error_log("Erreur lors de la suppression de la réservation : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Check availability for a given date/time
+     * Vérifie la disponibilité pour une date/heure donnée
      * 
-     * @param string $restaurantId Restaurant ID
+     * @param string $restaurantId ID du restaurant
      * @param string $date Date (YYYY-MM-DD)
-     * @param string $time Time (HH:MM)
-     * @return bool True if time slot is available
+     * @param string $time Heure (HH:MM)
+     * @return bool True si le créneau horaire est disponible
      */
     public function checkAvailability(string $restaurantId, string $date, string $time): bool {
         try {
-            // Get restaurant to check capacity
+            // Récupérer le restaurant pour vérifier la capacité
             $restaurantModel = new Restaurant();
             $restaurant = $restaurantModel->getById($restaurantId);
             
@@ -252,7 +252,7 @@ class Reservation {
             
             $capacity = $restaurant['capacity'] ?? 50;
             
-            // Count existing reservations for this date/time
+            // Compter les réservations existantes pour cette date/heure
             $reservations = $this->collection->find([
                 'restaurant_id' => new ObjectId($restaurantId),
                 'reservation_date' => $this->convertToUTCDateTime($date),
@@ -265,23 +265,23 @@ class Reservation {
                 $totalGuests += $reservation['party_size'] ?? 0;
             }
             
-            // Simple availability check - if total guests < 80% of capacity
+            // Vérification de disponibilité simple - si le total des invités < 80% de la capacité
             return $totalGuests < ($capacity * 0.8);
         } catch (\Exception $e) {
-            error_log("Error checking availability: " . $e->getMessage());
+            error_log("Erreur lors de la vérification de disponibilité : " . $e->getMessage());
             return false;
         }
     }
     
     /**
-     * Get available time slots for a date
+     * Récupère les créneaux horaires disponibles pour une date
      * 
-     * @param string $restaurantId Restaurant ID
+     * @param string $restaurantId ID du restaurant
      * @param string $date Date (YYYY-MM-DD)
-     * @return array Array of available time slots
+     * @return array Tableau de créneaux horaires disponibles
      */
     public function getAvailableTimeSlots(string $restaurantId, string $date): array {
-        // Standard restaurant time slots (simplified)
+        // Créneaux horaires standards de restaurant (simplifié)
         $allTimeSlots = [
             '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00',
             '18:00', '18:30', '19:00', '19:30', '20:00', '20:30', '21:00', '21:30'
@@ -299,10 +299,10 @@ class Reservation {
     }
     
     /**
-     * Mark reservation as checked in
+     * Marque une réservation comme enregistrée (check-in)
      * 
-     * @param string $id Reservation ID
-     * @return bool Success status
+     * @param string $id ID de la réservation
+     * @return bool Statut de succès
      */
     public function checkIn(string $id): bool {
         return $this->update($id, [
@@ -312,10 +312,10 @@ class Reservation {
     }
     
     /**
-     * Mark reservation as checked out
+     * Marque une réservation comme sortie (check-out)
      * 
-     * @param string $id Reservation ID
-     * @return bool Success status
+     * @param string $id ID de la réservation
+     * @return bool Statut de succès
      */
     public function checkOut(string $id): bool {
         return $this->update($id, [
@@ -324,11 +324,11 @@ class Reservation {
     }
     
     /**
-     * Count reservations by restaurant
+     * Compte les réservations par restaurant
      * 
-     * @param string $restaurantId Restaurant ID
-     * @param array $filters Optional filters
-     * @return int Count
+     * @param string $restaurantId ID du restaurant
+     * @param array $filters Filtres optionnels
+     * @return int Compteur
      */
     public function countByRestaurant(string $restaurantId, array $filters = []): int {
         try {
@@ -345,9 +345,9 @@ class Reservation {
     }
     
     /**
-     * Generate unique confirmation code
+     * Génère un code de confirmation unique
      * 
-     * @return string Confirmation code
+     * @return string Code de confirmation
      */
     private function generateConfirmationCode(): string {
         // Format: BIO-XX-YYYYMMDD-NNNN
@@ -359,9 +359,9 @@ class Reservation {
     }
     
     /**
-     * Convert date string to MongoDB UTCDateTime
+     * Convertit une chaîne de date en UTCDateTime MongoDB
      * 
-     * @param string $date Date string (YYYY-MM-DD)
+     * @param string $date Chaîne de date (YYYY-MM-DD)
      * @return UTCDateTime
      */
     private function convertToUTCDateTime(string $date): UTCDateTime {
