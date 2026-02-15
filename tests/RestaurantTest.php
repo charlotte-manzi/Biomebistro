@@ -1,0 +1,342 @@
+<?php
+
+namespace BiomeBistro\Tests;
+
+use PHPUnit\Framework\TestCase;
+use BiomeBistro\Models\Restaurant;
+use BiomeBistro\Models\Biome;
+
+/**
+ * Unit tests for Restaurant model
+ */
+class RestaurantTest extends TestCase
+{
+    private $restaurantModel;
+    private $biomeModel;
+    private $testRestaurantId;
+    private $testBiomeId;
+
+    protected function setUp(): void
+    {
+        $this->restaurantModel = new Restaurant();
+        $this->biomeModel = new Biome();
+        
+        // Create a test biome for restaurant tests
+        $biomeData = [
+            'name' => 'Test Biome for Restaurants',
+            'description' => 'Test biome',
+            'climate' => [
+                'temperature_range' => '20-25°C',
+                'humidity' => '60%',
+                'rainfall' => 'Medium'
+            ],
+            'color_theme' => '#27AE60',
+            'icon' => '🧪',
+            'native_ingredients' => ['test'],
+            'characteristics' => ['test'],
+            'season_best' => 'All'
+        ];
+        
+        $this->testBiomeId = $this->biomeModel->create($biomeData);
+    }
+
+    protected function tearDown(): void
+    {
+        // Clean up test data
+        if ($this->testRestaurantId) {
+            $this->restaurantModel->delete($this->testRestaurantId);
+        }
+        if ($this->testBiomeId) {
+            $this->biomeModel->delete($this->testBiomeId);
+        }
+    }
+
+    /**
+     * Test creating a new restaurant
+     */
+    public function testCreateRestaurant()
+    {
+        $testData = [
+            'name' => 'Test Restaurant',
+            'biome_id' => $this->testBiomeId,
+            'description' => 'A test restaurant',
+            'location' => [
+                'address' => '123 Test Street, Paris',
+                'coordinates' => [
+                    'type' => 'Point',
+                    'coordinates' => [2.3522, 48.8566]
+                ],
+                'district' => 'Test District'
+            ],
+            'contact' => [
+                'phone' => '+33 1 23 45 67 89',
+                'email' => 'test@biomebistro.fr',
+                'website' => 'www.test.fr'
+            ],
+            'cuisine_style' => 'Test Cuisine',
+            'price_range' => '€€',
+            'capacity' => 50,
+            'atmosphere' => [
+                'music' => 'Test music',
+                'lighting' => 'Test lighting',
+                'decor' => 'Test decor'
+            ],
+            'opening_hours' => [
+                ['day' => 'Monday', 'open' => '12:00', 'close' => '22:00', 'closed' => false]
+            ],
+            'features' => ['WiFi', 'Parking'],
+            'photos' => [],
+            'average_rating' => 4.5,
+            'total_reviews' => 10,
+            'special_events' => [],
+            'sustainability_score' => 8.0,
+            'eco_certifications' => [],
+            'status' => 'open'
+        ];
+
+        $this->testRestaurantId = $this->restaurantModel->create($testData);
+
+        $this->assertNotNull($this->testRestaurantId);
+        $this->assertIsString($this->testRestaurantId);
+    }
+
+    /**
+     * Test retrieving a restaurant by ID
+     */
+    public function testGetRestaurantById()
+    {
+        // Create test restaurant
+        $testData = [
+            'name' => 'Retrieval Test Restaurant',
+            'biome_id' => $this->testBiomeId,
+            'description' => 'Testing retrieval',
+            'location' => [
+                'address' => '456 Test Ave, Paris',
+                'coordinates' => [
+                    'type' => 'Point',
+                    'coordinates' => [2.3522, 48.8566]
+                ],
+                'district' => 'Test District'
+            ],
+            'contact' => [
+                'phone' => '+33 1 98 76 54 32',
+                'email' => 'retrieval@test.fr',
+                'website' => 'www.retrieval.fr'
+            ],
+            'cuisine_style' => 'French',
+            'price_range' => '€€€',
+            'capacity' => 60,
+            'atmosphere' => [
+                'music' => 'Jazz',
+                'lighting' => 'Dim',
+                'decor' => 'Modern'
+            ],
+            'opening_hours' => [],
+            'features' => ['Terrace'],
+            'photos' => [],
+            'average_rating' => 4.0,
+            'total_reviews' => 5,
+            'special_events' => [],
+            'sustainability_score' => 7.5,
+            'eco_certifications' => [],
+            'status' => 'open'
+        ];
+
+        $this->testRestaurantId = $this->restaurantModel->create($testData);
+        
+        // Retrieve it
+        $restaurant = $this->restaurantModel->getById($this->testRestaurantId);
+
+        $this->assertNotNull($restaurant);
+        $this->assertEquals('Retrieval Test Restaurant', $restaurant['name']);
+        $this->assertEquals('French', $restaurant['cuisine_style']);
+        $this->assertEquals('€€€', $restaurant['price_range']);
+    }
+
+    /**
+     * Test getting all restaurants
+     */
+    public function testGetAllRestaurants()
+    {
+        $restaurants = $this->restaurantModel->getAll();
+
+        $this->assertIsArray($restaurants);
+        $this->assertGreaterThan(0, count($restaurants));
+        
+        if (count($restaurants) > 0) {
+            $firstRestaurant = $restaurants[0];
+            $this->assertArrayHasKey('name', $firstRestaurant);
+            $this->assertArrayHasKey('biome_id', $firstRestaurant);
+            $this->assertArrayHasKey('location', $firstRestaurant);
+        }
+    }
+
+    /**
+     * Test filtering restaurants
+     */
+    public function testFilterRestaurants()
+    {
+        $filterParams = [
+            'min_rating' => 4.0,
+            'price_range' => '€€'
+        ];
+
+        $filteredRestaurants = $this->restaurantModel->filter($filterParams);
+
+        $this->assertIsArray($filteredRestaurants);
+        
+        // Each restaurant should meet filter criteria
+        foreach ($filteredRestaurants as $restaurant) {
+            if (isset($restaurant['average_rating'])) {
+                $this->assertGreaterThanOrEqual(4.0, $restaurant['average_rating']);
+            }
+        }
+    }
+
+    /**
+     * Test getting top rated restaurants
+     */
+    public function testGetTopRatedRestaurants()
+    {
+        $topRestaurants = $this->restaurantModel->getTopRated(5);
+
+        $this->assertIsArray($topRestaurants);
+        $this->assertLessThanOrEqual(5, count($topRestaurants));
+        
+        // Verify they are sorted by rating
+        $previousRating = 5.0;
+        foreach ($topRestaurants as $restaurant) {
+            $this->assertLessThanOrEqual($previousRating, $restaurant['average_rating']);
+            $previousRating = $restaurant['average_rating'];
+        }
+    }
+
+    /**
+     * Test updating a restaurant
+     */
+    public function testUpdateRestaurant()
+    {
+        // Create test restaurant
+        $testData = [
+            'name' => 'Original Restaurant Name',
+            'biome_id' => $this->testBiomeId,
+            'description' => 'Original description',
+            'location' => [
+                'address' => '789 Test Blvd, Paris',
+                'coordinates' => [
+                    'type' => 'Point',
+                    'coordinates' => [2.3522, 48.8566]
+                ],
+                'district' => 'Original District'
+            ],
+            'contact' => [
+                'phone' => '+33 1 11 22 33 44',
+                'email' => 'original@test.fr',
+                'website' => 'www.original.fr'
+            ],
+            'cuisine_style' => 'Italian',
+            'price_range' => '€€',
+            'capacity' => 40,
+            'atmosphere' => ['music' => 'Classical', 'lighting' => 'Bright', 'decor' => 'Traditional'],
+            'opening_hours' => [],
+            'features' => [],
+            'photos' => [],
+            'average_rating' => 3.5,
+            'total_reviews' => 2,
+            'special_events' => [],
+            'sustainability_score' => 6.0,
+            'eco_certifications' => [],
+            'status' => 'open'
+        ];
+
+        $this->testRestaurantId = $this->restaurantModel->create($testData);
+
+        // Update it
+        $updateData = [
+            'name' => 'Updated Restaurant Name',
+            'description' => 'Updated description',
+            'price_range' => '€€€€'
+        ];
+
+        $result = $this->restaurantModel->update($this->testRestaurantId, $updateData);
+        $this->assertTrue($result);
+
+        // Verify update
+        $updatedRestaurant = $this->restaurantModel->getById($this->testRestaurantId);
+        $this->assertEquals('Updated Restaurant Name', $updatedRestaurant['name']);
+        $this->assertEquals('Updated description', $updatedRestaurant['description']);
+        $this->assertEquals('€€€€', $updatedRestaurant['price_range']);
+    }
+
+    /**
+     * Test deleting a restaurant
+     */
+    public function testDeleteRestaurant()
+    {
+        // Create test restaurant
+        $testData = [
+            'name' => 'To Be Deleted Restaurant',
+            'biome_id' => $this->testBiomeId,
+            'description' => 'Will be deleted',
+            'location' => [
+                'address' => '999 Delete St, Paris',
+                'coordinates' => [
+                    'type' => 'Point',
+                    'coordinates' => [2.3522, 48.8566]
+                ],
+                'district' => 'Delete District'
+            ],
+            'contact' => [
+                'phone' => '+33 1 00 00 00 00',
+                'email' => 'delete@test.fr',
+                'website' => 'www.delete.fr'
+            ],
+            'cuisine_style' => 'Temporary',
+            'price_range' => '€',
+            'capacity' => 10,
+            'atmosphere' => ['music' => 'None', 'lighting' => 'None', 'decor' => 'None'],
+            'opening_hours' => [],
+            'features' => [],
+            'photos' => [],
+            'average_rating' => 1.0,
+            'total_reviews' => 0,
+            'special_events' => [],
+            'sustainability_score' => 1.0,
+            'eco_certifications' => [],
+            'status' => 'closed'
+        ];
+
+        $id = $this->restaurantModel->create($testData);
+        
+        // Delete it
+        $result = $this->restaurantModel->delete($id);
+        $this->assertTrue($result);
+
+        // Verify deletion
+        $deletedRestaurant = $this->restaurantModel->getById($id);
+        $this->assertNull($deletedRestaurant);
+        
+        $this->testRestaurantId = null; // Already deleted
+    }
+
+    /**
+     * Test search functionality
+     */
+    public function testSearchRestaurants()
+    {
+        $searchTerm = 'Test';
+        $results = $this->restaurantModel->search($searchTerm);
+        
+        $this->assertIsArray($results);
+    }
+    /**
+     * Test count functionality
+     */
+    public function testCountRestaurants()
+    {
+        $count = $this->restaurantModel->count();
+
+        $this->assertIsInt($count);
+        $this->assertGreaterThan(0, $count);
+    }
+}

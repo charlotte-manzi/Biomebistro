@@ -1,0 +1,23 @@
+{
+    "name": "biomebistro/restaurant-platform",
+    "description": "BiomeBistro - Taste the World's Ecosystems",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "BiomeBistro Team"
+        }
+    ],
+    "require": {
+        "php": ">=7.4",
+        "mongodb/mongodb": "^1.15"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+    "psr-4": {
+        "BiomeBistro\\": ["src/", "config/"]
+    }
+}
+}
