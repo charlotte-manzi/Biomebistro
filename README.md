@@ -128,6 +128,22 @@ Réservations avec statut (pending, confirmed, cancelled)
 - ✅ **Design moderne** : Interface responsive avec images réelles
 
 ---
+---
+
+## 📌 Notes Importantes
+
+### Système de démonstration
+Pour ce projet académique, l'email `demo@example.com` est utilisé comme identifiant de démonstration pour tester les fonctionnalités de réservations et d'avis. 
+
+Dans une application en production, un système complet d'authentification utilisateur serait implémenté avec :
+- Inscription et connexion sécurisées
+- Gestion de sessions
+- Hashage des mots de passe
+- Chaque utilisateur verrait uniquement ses propres réservations et avis
+
+Cette approche permet de se concentrer sur les aspects principaux du projet : MongoDB, CRUD, et les requêtes NoSQL.
+
+---
 
 ## 👨‍💻 Auteur
 
